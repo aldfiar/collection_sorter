@@ -30,6 +30,7 @@ class MangaSorter(Sorter):
 
     def _directory_action(self, name: str, source: Path, destination: Path, zip_files,
                           remove_original):
+        logger.info(f"Move file from: {source}")
         try:
             if zip_files:
                 zip_file = Zipper.zip_directory(source, destination, override_name=name)

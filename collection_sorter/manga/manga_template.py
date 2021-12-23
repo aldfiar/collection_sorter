@@ -1,15 +1,11 @@
 from typing import Dict, Any
-
 import pycountry
 
 languages = [d.name for d in pycountry.languages]
 
 
-def base_manga_template(info: Dict[str, Any], linux=True):
-    author_raw = info["author"]
-    if "." in author_raw:
-        author_raw = author_raw.replace(".", "")
-    author = author_raw
+def manga_template_function(info: Dict[str, Any], symbol_replace_function=None):
+    author = info["author"]
     group = info.get("group")
     name = " ".join(info["name"].split())
     language_tag = None
@@ -21,7 +17,7 @@ def base_manga_template(info: Dict[str, Any], linux=True):
 
     template = f"{author_info} {name}" if language_tag is None else f"{author_info} {name} [{language_tag}]"
 
-    if linux:
-        template = template.replace(" ", "_")
+    if symbol_replace_function:
+        template = symbol_replace_function(template)
 
     return template

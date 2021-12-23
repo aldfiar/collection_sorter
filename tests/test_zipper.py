@@ -1,14 +1,21 @@
+import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from collection_sorter.zipper import Zipper
+from collection_sorter.common.archive import ArchivedCollection
 
 
 class TestZipper(TestCase):
-    def test_zip_folder(self):
-        p = Path("G:\Test\(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)")
-        Zipper.zip_directory(p)
 
-    def test_zip_folder_overide(self):
-        p = Path("G:\Test\(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)")
-        Zipper.zip_directory(p, override_name="[Zanzi]GRANCHANGE FANTASY")
+    def setUp(self) -> None:
+        self.source = Path(tempfile.TemporaryDirectory().name)
+        self.source.mkdir()
+        for i in range(10):
+            stf = tempfile.TemporaryFile(dir=str(self.source.absolute()))
+        self.destination = Path(tempfile.TemporaryDirectory().name)
+        self.destination.mkdir()
+
+    def test_archive_folder(self):
+        collection = ArchivedCollection(self.source)
+        collection.archive_folders(zip_parent=True)
+        self.assertTrue(collection.path.is_file())

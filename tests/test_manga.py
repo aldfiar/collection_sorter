@@ -2,73 +2,65 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from collection_sorter.manga import MangaExtractor
+from collection_sorter.manga import MangaParser
 
-mangas = ["(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)",
-          "(C94) [squeezecandyheaven (Ichihaya)] Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross! [English] [sneikkimies]",
-          "[MonsieuR (MUK)] Tiny Evil 3 [English] {Hennojin} [Decensored] [Digital]",
-          "[Shoujo Kishidan (Oyari Ashito)] Uchi no Meishimai ga Yuuwaku Shite Kuru"]
-names = ["GRANCHANGE FANTASY",
-         "Tiny Evil 3",
-         "Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross!",
-         "Uchi no Meishimai ga Yuuwaku Shite Kuru"]
-names_with_tags = ["GRANCHANGE FANTASY [Granblue Fantasy]",
-                   "Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross! [English] [sneikkimies]",
-                   "Tiny Evil 3 [English] [Hennojin] [Decensored] [Digital]",
-                   "Uchi no Meishimai ga Yuuwaku Shite Kuru"]
-authors_full = ["ASGO (Zanzi)", "squeezecandyheaven (Ichihaya)", "MonsieuR (MUK)", "Shoujo Kishidan (Oyari Ashito)"]
-authors = ["Zanzi", "Ichihaya", "MUK", "Oyari Ashito"]
-groups = ["ASGO", "squeezecandyheaven", "MonsieuR", "Shoujo Kishidan"]
-
+mangas = [
+    "(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)",
+    "(C94) [squeezecandyheaven (Ichihaya)] Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross! [English] [sneikkimies]",
+    "[MonsieuR (MUK)] Tiny Evil 3 [English] {Hennojin} [Decensored] [Digital]",
+    "[Shoujo Kishidan (Oyari Ashito)] Uchi no Meishimai ga Yuuwaku Shite Kuru"
+]
+names = [
+    "GRANCHANGE FANTASY",
+    "Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross!",
+    "Tiny Evil 3",
+    "Uchi no Meishimai ga Yuuwaku Shite Kuru"
+]
+authors = [
+    "Zanzi",
+    "Ichihaya",
+    "MUK",
+    "Oyari Ashito"
+]
+groups = [
+    "ASGO",
+    "squeezecandyheaven",
+    "MonsieuR",
+    "Shoujo Kishidan"
+]
 
 class TestManga(TestCase):
 
     def setUp(self) -> None:
-        self.extractor = MangaExtractor()
+        self.parser = MangaParser
 
     def test_name_with_lower(self):
-        manga = "[Gentsuki_(Gentsuki)]_Kimi_Omou_Koi_-_I_think_of_you"
-        p = Path(manga)
-        info = self.extractor.extract(p)
-        self.assertEqual("Kimi Omou Koi - I think of you", info["name"])
-        self.assertEqual("Gentsuki", info["author"])
+        manga = "[Gentsuki (Gentsuki)] Kimi Omou Koi - I think of you"
+        info = self.parser.parse(manga)
+        self.assertEqual('Gentsuki', info['author'])
+        self.assertEqual('Gentsuki', info['group'])
+        self.assertEqual('Kimi Omou Koi - I think of you', info['name'])
+        self.assertFalse(info['tags'])
 
-    def test_extract_name_without_tags(self):
+    def test_without_author(self):
+        manga = "Towako 4 [English] {CapableScoutMan & bigk40k} [Digital]"
+        info = self.parser.parse(manga)
+        self.assertEqual('Towako', info['author'])
+        self.assertEqual('Towako 4', info['name'])
+        self.assertIn('English', info['tags'])
+
+    def test_bracket_position(self):
+        manga = 'Towako 2 (Complete) [English] {CapableScoutMan & B E C Scans & S T A L K E R & bigk40k}'
+        info = self.parser.parse(manga)
+        self.assertEqual('Towako', info['author'])
+        self.assertEqual('Towako 2', info['name'])
+        self.assertIn('English', info['tags'])
+
+    def test_parser(self):
+        counter = 0
         for manga in mangas:
-            name = self.extractor.extract_name(manga, keep_tags=False)
-            self.assertIn(name, names)
-
-    def test_extract_name_with_tags(self):
-        for manga in mangas:
-            name = self.extractor.extract_name(manga)
-            self.assertIn(name, names_with_tags)
-
-    def test_extract_author_info(self):
-        for manga in mangas:
-            info = self.extractor.extract_author_info(manga)
-            self.assertIn(info, authors_full)
-
-    def test_extract_group(self):
-        for manga in mangas:
-            group = self.extractor.extract_group(manga)
-            self.assertIn(group, groups)
-
-    def test_extract_author(self):
-        for manga in mangas:
-            author = self.extractor.extract_author(manga)
-            self.assertIn(author, authors)
-
-    def test_folder_which_contains_subfolders(self):
-        source = Path(tempfile.TemporaryDirectory().name)
-        source.mkdir()
-        subfile = tempfile.TemporaryDirectory(dir=str(source.absolute()))
-        d = self.extractor.extract(source)
-        self.assertEqual(source.name, d["author"])
-
-    def test_folder_which_contains_files(self):
-        source = Path(tempfile.TemporaryDirectory().name)
-        source.mkdir()
-        stf = tempfile.TemporaryFile(dir=str(source.absolute()))
-        d = self.extractor.extract(source)
-        self.assertEqual(source.name, d["name"])
-
+            info = self.parser.parse(manga)
+            self.assertEqual(authors[counter], info['author'])
+            self.assertEqual(names[counter], info['name'])
+            self.assertIn(groups[counter], info['group'])
+            counter += 1

@@ -6,7 +6,7 @@ authors = ["Your Name <your.email@example.com>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.12"
 pycountry = "^20.7.3"
 parse = "^1.19.0"
 click = "^7.1.2"

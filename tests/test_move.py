@@ -1,13 +1,8 @@
 import tempfile
 from pathlib import Path
-from random import random
 from unittest import TestCase
 
 from collection_sorter.common.move import MovableCollection
-
-
-def reverse(st):
-    return '0' if st == '1' else '0'
 
 
 class TestMover(TestCase):
@@ -17,35 +12,45 @@ class TestMover(TestCase):
         self.source = Path(self.source_temp.name)
         self.destination_temp = tempfile.TemporaryDirectory()
         self.destination = Path(self.destination_temp.name)
-        self.files = []
-
-
-
-
-
-    def test_move_file_to_dest(self):
-        stf = tempfile.TemporaryFile(dir=str(self.source.absolute()))
-        self.files.append(stf)
-        ftm = Path(stf.name)
-        collection = MovableCollection(self.source)
-        collection.move(self.destination)
-        expected = self.destination.joinpath(ftm.name)
-        self.assertTrue(expected.exists())
-
-
-    def test_copy_file_to_dest(self):
-        stf = tempfile.TemporaryFile(dir=str(self.source.absolute()))
-        ftm = Path(stf.name)
-        collection = MovableCollection(self.source)
-        collection.copy(self.destination)
-        expected = self.destination.joinpath(ftm.name)
-        self.assertTrue(expected.exists())
-        self.assertTrue(ftm.exists())
 
     def tearDown(self) -> None:
         self.source_temp.cleanup()
         self.destination_temp.cleanup()
-        for file in self.files:
-            file.close()
 
+    def test_move_file_to_dest(self):
+        source_file = self.source / 'testfile.txt'
+        source_file.write_text('Hello, World!')
+        collection = MovableCollection(self.source)
+        collection.move(self.destination)
+        expected_path = self.destination / 'testfile.txt'
+        self.assertTrue(expected_path.exists())
+        self.assertFalse(source_file.exists())
 
+    def test_copy_file_to_dest(self):
+        source_file = self.source / 'testfile.txt'
+        source_file.write_text('Hello, World!')
+        collection = MovableCollection(self.source)
+        collection.copy(self.destination)
+        expected_path = self.destination / 'testfile.txt'
+        self.assertTrue(expected_path.exists())
+        self.assertTrue(source_file.exists())
+
+    def test_move_directory_to_dest(self):
+        subdirectory = self.source / 'subdir'
+        subdirectory.mkdir()
+        (subdirectory / 'testfile.txt').write_text('Hello, World!')
+        collection = MovableCollection(self.source)
+        collection.move(self.destination)
+        expected_path = self.destination / 'subdir' / 'testfile.txt'
+        self.assertTrue(expected_path.exists())
+        self.assertFalse(subdirectory.exists())
+
+    def test_copy_directory_to_dest(self):
+        subdirectory = self.source / 'subdir'
+        subdirectory.mkdir()
+        (subdirectory / 'testfile.txt').write_text('Hello, World!')
+        collection = MovableCollection(self.source)
+        collection.copy(self.destination)
+        expected_path = self.destination / 'subdir' / 'testfile.txt'
+        self.assertTrue(expected_path.exists())
+        self.assertTrue(subdirectory.exists())

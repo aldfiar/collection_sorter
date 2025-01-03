@@ -21,7 +21,7 @@ class TestCollectionPath(unittest.TestCase):
         
         paths = self.collection_path.collect_all()
         self.assertEqual(len(paths), 1)
-        self.assertIn(file_path, paths)
+        self.assertIn(file_path.resolve(), paths)
 
     def test_directory_with_empty_subdirectories(self):
         sub_dir = Path(self.temp_dir.name) / 'subdir'
@@ -45,8 +45,8 @@ class TestCollectionPath(unittest.TestCase):
 
         paths = self.collection_path.collect_all()
         self.assertEqual(len(paths), 2)
-        self.assertIn(file1_path, paths)
-        self.assertIn(file2_path, paths)
+        self.assertIn(file1_path.resolve(), paths)
+        self.assertIn(file2_path.resolve(), paths)
 
 if __name__ == '__main__':
     unittest.main()

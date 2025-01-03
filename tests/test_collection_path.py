@@ -1,5 +1,6 @@
 import unittest
 from tempfile import TemporaryDirectory
+from pathlib import Path
 from collection_sorter.common.files import CollectionPath
 
 class TestCollectionPath(unittest.TestCase):

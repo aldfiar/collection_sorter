@@ -11,7 +11,7 @@ class MovableCollection(CollectionPath):
 
     def _change(self, new_path: Path, command: Callable[[Path, Path], None]) -> CollectionPath:
         if not new_path.exists():
-            new_path.mkdir(parents=True, mode=0755)
+            new_path.mkdir(parents=True, mode=755)
 
         for file in self.get_files():
             source_path = file.resolve()

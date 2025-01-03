@@ -1,8 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Callable
-
-from collection_sorter.common.files import CollectionPath
+import shutil
 
 logger = logging.getLogger('move')
 

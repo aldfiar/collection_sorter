@@ -5,6 +5,3 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 
-from .manga_sort import *
-from .mass_rename import *
-from .video_rename import *

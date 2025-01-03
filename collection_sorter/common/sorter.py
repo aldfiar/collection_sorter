@@ -4,9 +4,9 @@ from functools import partial
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 
-from collection_sorter.common.archive import ArchivedCollection
-from collection_sorter.common.files import CollectionPath
-from collection_sorter.common.move import MovableCollection
+from common.archive import ArchivedCollection
+from common.files import CollectionPath
+from common.move import MovableCollection
 
 
 class BaseCollection(MovableCollection, ArchivedCollection):

@@ -7,10 +7,10 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-pycountry = "^20.7.3"
-parse = "^1.19.0"
-click = "^7.1.2"
-python-dateutil = "^2.1"
+pycountry = "^23.12.11"
+parse = "^1.20.1"
+click = "^8.1.7"
+python-dateutil = "^2.9.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

@@ -30,47 +30,44 @@ def rename_video():
     rename_sort(args)
 
 
-def rename_function(name: str) -> str:
-    tags = True
-    changed_name = name.strip()
-    extension = changed_name.split(".")[-1]
-    changed_name = changed_name.replace(extension, "")
-    while tags:
-        start = changed_name.find("[")
-        end = changed_name.find("]")
-        brackets = end != -1 and start != -1
-        if brackets:
-            if start == 0:
-                changed_name = changed_name[end + 1:]
-            else:
-                changed_name = changed_name[:start - 1] + changed_name[end + 1:]
-        another_start = changed_name.find("(")
-        another_end = changed_name.find(")")
-        curve = another_start != -1 and another_end != -1
-        if curve:
-            if another_start == 0:
-                changed_name = changed_name[another_end + 1:]
-            else:
-                changed_name = changed_name[:another_start - 1] + changed_name[another_end + 1:]
-        tags = curve or brackets
-        changed_name = changed_name.strip()
+def remove_brackets(filename):
+    result = ''
+    inside_brackets = 0
+
+    for char in filename:
+        if char in '([':
+            inside_brackets += 1
+        elif char in ')]':
+            inside_brackets -= 1
+        elif inside_brackets == 0:
+            result += char
+
+    return result
 
 
-    elements = re.split("_| ", changed_name)
-    # for element in elements:
-    #     if " " in element:
-    #         res = element.split(" ")
-    #         final_elements.extend(res)
-    #     else:
-    #         final_elements.append(element)
+def rename_function(filename):
+    splited = filename.split('.')
+    extension = splited[-1]
+    name = splited[0].replace("-", "")
+    if "@" in name:
+        name = name.split("@")[-1]
+    brackets_removed = remove_brackets(name)
+    name_parts = re.split("_| ", brackets_removed)
 
-    final_elements = list(filter(None, elements))
+    title = ''
+    episode = ''
 
-    full_name = "_".join(final_elements)
-    if full_name.endswith("."):
-        result = f"{full_name}{extension}"
+    for part in name_parts:
+        if part.isdigit():
+            episode = part
+            break
+        else:
+            title += part + ' '
+    updated = title.strip()
+    if episode:
+        result = f"{updated} - {episode}.{extension}"
     else:
-        result = f"{full_name}.{extension}"
+        result = f"{updated}.{extension}"
     return result
 
 
@@ -97,6 +94,7 @@ class SomeStrange(MultiThreadTask):
                 if renamed_path.exists():
                     duplicate_name = f"duplicate_{uuid.uuid4()}_" + changed
                     renamed_path = path.parent.joinpath(duplicate_name)
+                print(renamed_path)
                 path.rename(renamed_path)
                 logging.info(f"Change {name} to {renamed_path}")
 

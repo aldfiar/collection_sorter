@@ -3,8 +3,8 @@ from optparse import OptionParser
 from pathlib import Path
 from typing import List
 
-from .common.sorter import SortExecutor, BaseCollection
-from .manga.manga_sorter import MangaSorter
+from common.sorter import BaseCollection, SortExecutor
+from manga.manga_sorter import MangaSorter
 
 
 def manga_sort_options():

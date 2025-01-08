@@ -40,6 +40,10 @@ mypy = "^1.8.0"
 
 [tool.poetry.scripts]
 collection-sorter = "collection_sorter.cli:main"
+manga-sort = "collection_sorter.manga_sort:manga_sort"
+mass-rename = "collection_sorter.mass_rename:rename_files"
+mass-zip = "collection_sorter.mass_zip:zip_collections"
+video-rename = "collection_sorter.video_rename:rename_sort"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

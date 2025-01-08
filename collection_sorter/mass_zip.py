@@ -91,7 +91,17 @@ class ZipCollections(MultiThreadTask):
         try:
             collection = ArchivedCollection(source)
             logger.info(f"Processing collection: {source}")
-            collection = collection.archive_folders(zip_parent=True)
+            
+            # Create archive in destination directory if specified
+            if destination:
+                collection = collection.archive_directory(destination=destination)
+            else:
+                collection = collection.archive_folders(zip_parent=True)
+                
+            if self._remove and source.exists():
+                import shutil
+                shutil.rmtree(source)
+                
             logger.info(f"Successfully archived: {source}")
         except Exception as e:
             logger.error(f"Failed to process {source}: {str(e)}")
@@ -118,15 +128,12 @@ def zip_collections(
     task = ZipCollections(archive=archive, remove=move)
     sorter = SortExecutor()
     
+    dest_path = Path(destination) if destination else None
+    
     for source in sources:
         try:
             root = Path(source)
-            collection = ArchivedCollection(root)
-            sorter.sort(
-                collection=collection,
-                destination=Path(destination) if destination else None,
-                task=task
-            )
+            task.execute(root, dest_path)
             logger.info(f"Successfully processed: {source}")
         except Exception as e:
             logger.error(f"Failed to process {source}: {str(e)}")

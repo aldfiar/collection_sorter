@@ -1,28 +1,43 @@
-from typing import Any, Dict
-
+from typing import Any, Dict, Optional, Callable
 import pycountry
+from functools import lru_cache
 
-languages = [d.name for d in pycountry.languages]
+@lru_cache(maxsize=1)
+def _get_languages():
+    return {lang.name.lower() for lang in pycountry.languages}
 
-
-def manga_template_function(info: Dict[str, Any], symbol_replace_function=None):
+def manga_template_function(
+    info: Dict[str, Any], 
+    symbol_replace_function: Optional[Callable[[str], str]] = None
+) -> str:
+    """Format manga information into a standardized filename.
+    
+    Args:
+        info: Dictionary containing manga metadata
+        symbol_replace_function: Optional function to clean up special characters
+        
+    Returns:
+        Formatted filename string
+    """
     author = info["author"]
-    group = info.get("group")
     name = " ".join(info["name"].split())
+    
+    # Build author info section
+    group = info.get("group")
+    author_info = f"[{group} ({author})]" if group else f"[{author}]"
+    
+    # Check for language tag
+    languages = _get_languages()
     language_tag = None
-    if "tags" in info:
-        for tag in info["tags"]:
-            if tag.title() in languages:
-                language_tag = tag
-    author_info = f"[{group} ({author})]" if group is not None else f"[{author}]"
+    if tags := info.get("tags"):
+        language_tag = next(
+            (tag for tag in tags if tag.lower() in languages),
+            None
+        )
+    
+    # Assemble template
+    template = f"{author_info} {name}"
+    if language_tag:
+        template = f"{template} [{language_tag}]"
 
-    template = (
-        f"{author_info} {name}"
-        if language_tag is None
-        else f"{author_info} {name} [{language_tag}]"
-    )
-
-    if symbol_replace_function:
-        template = symbol_replace_function(template)
-
-    return template
+    return symbol_replace_function(template) if symbol_replace_function else template

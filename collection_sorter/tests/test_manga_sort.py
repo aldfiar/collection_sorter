@@ -7,10 +7,10 @@ from collection_sorter.manga_sort import manga_sort
 
 # Test data from test_manga.py
 TEST_MANGAS = [
-    "(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)",
-    "(C94) [squeezecandyheaven (Ichihaya)] Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross! [English] {sneikkimies}",
-    "[MonsieuR (MUK)] Tiny Evil 3 [English] {Hennojin} [Decensored] [Digital]",
-    "[Shoujo Kishidan (Oyari Ashito)] Uchi no Meishimai ga Yuuwaku Shite Kuru"
+    "(C90) [ASGO (Whisper)] MOONLIGHT SYMPHONY (Starlight Dreams)",
+    "(C94) [sugarplumstudio (Raindrops)] Sweet Dreams and Butterfly Wings [English] {sunflower}",
+    "[ArtisanWork (Cloudbreak)] Garden Tales 3 [English] {Stardust} [Restored] [Digital]",
+    "[Crystal Workshop (River Song)] Dancing Through The Cherry Blossoms"
 ]
 
 class TestMangaSort(TestCase):

@@ -10,12 +10,12 @@ class TestMassRename(TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.test_files = [
-            "Ane_chijo_max_heart_01_[1280-720][Galan_rus_raw][66C845C4].mkv",
-            "Baka_na_Imouto_o_Rikou_ni_Suru_no_wa_Ore_no_XX_Dake_na_Ken_ni_Tsuite_01_[F2A5991E].mkv",
-            "Ane Chijo Max Heart_01.ass",
-            "Bible Black Gaiden OVA 1.mp4",
-            "[Beatrice-Raws] Shoujo Ramune 01 [DVDRip 720x480 x264 AC3].mkv",
-            "Ecchi na Onee-chan ni Shiboraretai - 01 [720p-HEVC-WEBRip][69A3098A].mkv"
+            "Sunset_valley_dreams_01_[1280-720][Summer_eng_raw][66C845C4].mkv",
+            "Moonlight_whispers_through_autumn_leaves_01_[F2A5991E].mkv",
+            "Sunset Valley Dreams_01.ass",
+            "Crystal Garden Episode 1.mp4",
+            "[Stardust-Subs] Dancing Fireflies 01 [DVDRip 720x480 x264 AC3].mkv",
+            "Midnight Symphony Orchestra - 01 [720p-HEVC-WEBRip][69A3098A].mkv"
         ]
         
         # Create test files
@@ -32,16 +32,16 @@ class TestMassRename(TestCase):
         cleaner = FileNameCleaner()
         test_cases = [
             (
-                "Ane_chijo_max_heart_01_[1280-720][Galan_rus_raw][66C845C4].mkv",
-                "Ane_chijo_max_heart_01.mkv"
+                "Sunset_valley_dreams_01_[1280-720][Summer_eng_raw][66C845C4].mkv",
+                "Sunset_valley_dreams_01.mkv"
             ),
             (
-                "Bible Black Gaiden OVA 1.mp4",
-                "Bible Black Gaiden OVA 1.mp4"
+                "Crystal Garden Episode 1.mp4",
+                "Crystal Garden Episode 1.mp4"
             ),
             (
-                "[Beatrice-Raws] Shoujo Ramune 01 [DVDRip 720x480 x264 AC3].mkv",
-                "Shoujo Ramune 01.mkv"
+                "[Stardust-Subs] Dancing Fireflies 01 [DVDRip 720x480 x264 AC3].mkv",
+                "Dancing Fireflies 01.mkv"
             )
         ]
 
@@ -59,12 +59,12 @@ class TestMassRename(TestCase):
         # Check results
         renamed_files = set(f.name for f in Path(self.temp_dir).iterdir())
         expected_files = {
-            "Ane_chijo_max_heart_01.mkv",
-            "Baka_na_Imouto_o_Rikou_ni_Suru_no_wa_Ore_no_XX_Dake_na_Ken_ni_Tsuite_01.mkv",
-            "Ane Chijo Max Heart_01.ass",
-            "Bible Black Gaiden OVA 1.mp4",
-            "Shoujo Ramune 01.mkv",
-            "Ecchi na Onee - chan ni Shiboraretai - 01.mkv"
+            "Sunset_valley_dreams_01.mkv",
+            "Moonlight_whispers_through_autumn_leaves_01.mkv",
+            "Sunset Valley Dreams_01.ass",
+            "Crystal Garden Episode 1.mp4",
+            "Dancing Fireflies 01.mkv",
+            "Midnight Symphony Orchestra - 01.mkv"
         }
 
         self.assertEqual(renamed_files, expected_files)

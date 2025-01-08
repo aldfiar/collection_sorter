@@ -32,7 +32,10 @@ class FileNameCleaner:
         name = re.sub(r'\[[^\]]*\]', '', name)  # Remove [content]
         name = re.sub(r'\([0-9]{4}\)', '', name)  # Remove (YYYY)
         name = re.sub(r'_+', '_', name)  # Replace multiple underscores
-        name = name.strip('_').strip()  # Remove leading/trailing underscores
+        name = name.strip('_').strip()  # Remove leading/trailing underscores and spaces
+        
+        # Preserve existing hyphens between words
+        name = re.sub(r'\s*-\s*', ' - ', name)  # Standardize spacing around hyphens
         
         # Reconstruct filename with extension
         return f"{name}.{extension}" if extension else name

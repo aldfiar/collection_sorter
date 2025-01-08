@@ -1,0 +1,101 @@
+import tempfile
+from pathlib import Path
+from unittest import TestCase
+import shutil
+
+from collection_sorter.manga_sort import manga_sort
+
+# Test data from test_manga.py
+TEST_MANGAS = [
+    "(C90) [ASGO (Zanzi)] GRANCHANGE FANTASY (Granblue Fantasy)",
+    "(C94) [squeezecandyheaven (Ichihaya)] Imouto to Sex Suru nante Kimochi Warui Having Sex With Your Little Sister That's Gross! [English] {sneikkimies}",
+    "[MonsieuR (MUK)] Tiny Evil 3 [English] {Hennojin} [Decensored] [Digital]",
+    "[Shoujo Kishidan (Oyari Ashito)] Uchi no Meishimai ga Yuuwaku Shite Kuru"
+]
+
+class TestMangaSort(TestCase):
+    def setUp(self):
+        # Create temporary directories for testing
+        self.test_dir = tempfile.mkdtemp()
+        self.source_dir = Path(self.test_dir) / "source"
+        self.dest_dir = Path(self.test_dir) / "destination"
+        
+        # Create source directory structure
+        self.source_dir.mkdir()
+        self.dest_dir.mkdir()
+        
+        # Create test manga directories with sample files
+        for manga_name in TEST_MANGAS:
+            manga_dir = self.source_dir / manga_name
+            manga_dir.mkdir()
+            # Create a dummy file in each manga directory
+            (manga_dir / "page1.jpg").touch()
+
+    def tearDown(self):
+        # Clean up temporary directories
+        shutil.rmtree(self.test_dir)
+
+    def test_basic_manga_sort(self):
+        """Test basic manga sorting without archiving"""
+        manga_sort(
+            source=[str(self.source_dir)],
+            destination=str(self.dest_dir),
+            archive=False,
+            move=False
+        )
+
+        # Check if authors' directories were created
+        self.assertTrue((self.dest_dir / "Zanzi").exists())
+        self.assertTrue((self.dest_dir / "Ichihaya").exists())
+        self.assertTrue((self.dest_dir / "MUK").exists())
+        self.assertTrue((self.dest_dir / "Oyari Ashito").exists())
+
+        # Check if manga directories were properly sorted
+        self.assertTrue((self.dest_dir / "Zanzi" / "GRANCHANGE FANTASY").exists())
+        self.assertTrue((self.dest_dir / "MUK" / "Tiny Evil 3").exists())
+
+        # Verify source files still exist (since move=False)
+        self.assertTrue((self.source_dir / TEST_MANGAS[0]).exists())
+
+    def test_manga_sort_with_move(self):
+        """Test manga sorting with move option"""
+        manga_sort(
+            source=[str(self.source_dir)],
+            destination=str(self.dest_dir),
+            archive=False,
+            move=True
+        )
+
+        # Check if files were moved (source should be empty)
+        self.assertFalse((self.source_dir / TEST_MANGAS[0]).exists())
+        
+        # Check if files exist in destination
+        self.assertTrue((self.dest_dir / "Zanzi" / "GRANCHANGE FANTASY").exists())
+
+    def test_manga_sort_with_archive(self):
+        """Test manga sorting with archive option"""
+        manga_sort(
+            source=[str(self.source_dir)],
+            destination=str(self.dest_dir),
+            archive=True,
+            move=False
+        )
+
+        # Check if zip files were created
+        self.assertTrue(list(Path(self.dest_dir / "Zanzi").glob("*.zip")))
+        self.assertTrue(list(Path(self.dest_dir / "MUK").glob("*.zip")))
+
+    def test_manga_sort_with_archive_and_move(self):
+        """Test manga sorting with both archive and move options"""
+        manga_sort(
+            source=[str(self.source_dir)],
+            destination=str(self.dest_dir),
+            archive=True,
+            move=True
+        )
+
+        # Check if source files were removed
+        self.assertFalse((self.source_dir / TEST_MANGAS[0]).exists())
+        
+        # Check if zip files were created
+        self.assertTrue(list(Path(self.dest_dir / "Zanzi").glob("*.zip")))

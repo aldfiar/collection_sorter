@@ -39,8 +39,15 @@ class MangaSorter(MultiThreadTask):
             parser: Class to parse manga filenames
             remove: Whether to remove source files after processing
         """
-        super().__init__()
-        self._config = None
+        from collection_sorter.common.config import SortConfig
+        # Initialize with a dummy path that will be replaced during execute()
+        config = SortConfig(
+            source_path=Path("."),
+            archive=archive,
+            remove_source=remove,
+            rename_function=replace_function
+        )
+        super().__init__(config=config)
         if not callable(template):
             raise ValueError("Template must be a callable")
         

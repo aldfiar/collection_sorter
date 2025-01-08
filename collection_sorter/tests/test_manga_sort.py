@@ -5,12 +5,12 @@ import shutil
 
 from collection_sorter.manga_sort import manga_sort
 
-# Test data from test_manga.py
+# Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [
-    "(C90) [ASGO (Whisper)] MOONLIGHT SYMPHONY (Starlight Dreams)",
-    "(C94) [sugarplumstudio (Raindrops)] Sweet Dreams and Butterfly Wings [English] {sunflower}",
-    "[ArtisanWork (Cloudbreak)] Garden Tales 3 [English] {Stardust} [Restored] [Digital]",
-    "[Crystal Workshop (River Song)] Dancing Through The Cherry Blossoms"
+    "(C90) [Moonweaver Studio (Starlight)] Mystic Forest Symphony",
+    "(C94) [Dreamforge (Silverleaf)] Ethereal Wings & Stardust [English] {Moonshadow}",
+    "[Frostfire Works (Nightwhisper)] Crystal Gardens Saga 3 [English] {Dawnseeker} [Restored] [Digital]",
+    "[Sunspire Workshop (Riverwind)] Dancing with Aurora Lights"
 ]
 
 class TestMangaSort(TestCase):
@@ -45,14 +45,14 @@ class TestMangaSort(TestCase):
         )
 
         # Check if authors' directories were created
-        self.assertTrue((self.dest_dir / "Zanzi").exists())
-        self.assertTrue((self.dest_dir / "Ichihaya").exists())
-        self.assertTrue((self.dest_dir / "MUK").exists())
-        self.assertTrue((self.dest_dir / "Oyari Ashito").exists())
+        self.assertTrue((self.dest_dir / "Starlight").exists())
+        self.assertTrue((self.dest_dir / "Silverleaf").exists())
+        self.assertTrue((self.dest_dir / "Nightwhisper").exists())
+        self.assertTrue((self.dest_dir / "Riverwind").exists())
 
         # Check if manga directories were properly sorted
-        self.assertTrue((self.dest_dir / "Zanzi" / "GRANCHANGE FANTASY").exists())
-        self.assertTrue((self.dest_dir / "MUK" / "Tiny Evil 3").exists())
+        self.assertTrue((self.dest_dir / "Starlight" / "Mystic Forest Symphony").exists())
+        self.assertTrue((self.dest_dir / "Nightwhisper" / "Crystal Gardens Saga 3").exists())
 
         # Verify source files still exist (since move=False)
         self.assertTrue((self.source_dir / TEST_MANGAS[0]).exists())

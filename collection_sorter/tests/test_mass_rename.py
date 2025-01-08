@@ -10,12 +10,12 @@ class TestMassRename(TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.test_files = [
-            "Sunset_valley_dreams_01_[1280-720][Summer_eng_raw][66C845C4].mkv",
-            "Moonlight_whispers_through_autumn_leaves_01_[F2A5991E].mkv",
-            "Sunset Valley Dreams_01.ass",
-            "Crystal Garden Episode 1.mp4",
-            "[Stardust-Subs] Dancing Fireflies 01 [DVDRip 720x480 x264 AC3].mkv",
-            "Midnight Symphony Orchestra - 01 [720p-HEVC-WEBRip][69A3098A].mkv"
+            "Mystic_Vale_Chronicles_01_[1280-720][Frostweaver_eng_raw][66C845C4].mkv",
+            "Starlight_Wanderer_01_[F2A5991E].mkv",
+            "Crystal_Dreams_01.ass",
+            "Moonweaver Tales Episode 1.mp4",
+            "[Dawnseeker-Subs] Ethereal Whispers 01 [DVDRip 720x480 x264 AC3].mkv",
+            "Aurora Symphony - 01 [720p-HEVC-WEBRip][69A3098A].mkv"
         ]
         
         # Create test files
@@ -59,12 +59,12 @@ class TestMassRename(TestCase):
         # Check results
         renamed_files = set(f.name for f in Path(self.temp_dir).iterdir())
         expected_files = {
-            "Sunset_valley_dreams_01.mkv",
-            "Moonlight_whispers_through_autumn_leaves_01.mkv",
-            "Sunset Valley Dreams_01.ass",
-            "Crystal Garden Episode 1.mp4",
-            "Dancing Fireflies 01.mkv",
-            "Midnight Symphony Orchestra - 01.mkv"
+            "Mystic_Vale_Chronicles_01.mkv",
+            "Starlight_Wanderer_01.mkv",
+            "Crystal_Dreams_01.ass",
+            "Moonweaver Tales Episode 1.mp4",
+            "Ethereal Whispers 01.mkv",
+            "Aurora Symphony - 01.mkv"
         }
 
         self.assertEqual(renamed_files, expected_files)

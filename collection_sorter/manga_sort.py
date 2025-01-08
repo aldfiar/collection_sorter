@@ -23,13 +23,19 @@ def manga_sort_options():
         dest="destination",
         default=None,
     )
+    parser.add_option(
+        "--author-folders",
+        help="Process folders as author collections",
+        dest="author_folders",
+        action="store_true"
+    )
 
     options, args = parser.parse_args()
 
     return options, args
 
 
-def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
+def manga_sort(source: List[str], destination: str, archive: bool, move: bool, author_folders: bool = False):
     """Sort manga files from source directories into destination.
     
     Args:
@@ -44,7 +50,7 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
     dest_path = Path(destination)
     dest_path.mkdir(parents=True, exist_ok=True)
     
-    task = MangaSorter(archive=archive, remove=move)
+    task = MangaSorter(archive=archive, remove=move, author_folders=author_folders)
     
     for src in source:
         src_path = Path(src)
@@ -52,6 +58,18 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
             logging.warning(f"Source path does not exist: {src}")
             continue
             
-        task.execute(src_path, dest_path)
+        if author_folders:
+            # Process as author folder containing multiple manga
+            author_name = src_path.name
+            author_dest = dest_path / author_name
+            author_dest.mkdir(parents=True, exist_ok=True)
+            
+            # Process each subfolder as a manga
+            for manga_dir in src_path.iterdir():
+                if manga_dir.is_dir():
+                    task.execute(manga_dir, author_dest)
+        else:
+            # Process normally as individual manga folders
+            task.execute(src_path, dest_path)
 
 

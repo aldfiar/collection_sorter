@@ -30,6 +30,7 @@ class MangaSorter(MultiThreadTask):
         replace_function: Optional[Callable[[str], str]] = None,
         parser: Type[MangaParser] = MangaParser,
         remove: bool = False,
+        author_folders: bool = False,
     ) -> None:
         """Initialize the manga sorter.
     
@@ -57,6 +58,7 @@ class MangaSorter(MultiThreadTask):
         self._replace_function = replace_function
         self._parser = parser
         self._remove = remove
+        self._author_folders = author_folders
 
     def _create_destination(self, destination: Path, author: str) -> Path:
         """Creates and returns the destination directory for an author.

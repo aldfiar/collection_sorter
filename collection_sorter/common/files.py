@@ -1,14 +1,15 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import List, Union, Set, Iterator, Callable
+from typing import Callable, Iterator, List, Set, Union
 
-logger = logging.getLogger('files')
+logger = logging.getLogger("files")
+
 
 class CollectionPath:
     """
     A class to handle file and folder operations on a given path.
-    
+
     :param path: The path to the directory or file.
     """
 
@@ -19,7 +20,7 @@ class CollectionPath:
     def path(self) -> Path:
         """
         Get the resolved path.
-        
+
         :return: The resolved path.
         """
         return self._path
@@ -27,7 +28,7 @@ class CollectionPath:
     def _recursive_collect(self, path: Path) -> Set[Path]:
         """
         Recursively collect all files and folders in the given path.
-        
+
         :param path: The path to start collecting from.
         :return: A set of unique paths.
         """
@@ -43,7 +44,7 @@ class CollectionPath:
     def _get_elements(cls, path: Path, condition: Callable) -> Iterator[Path]:
         """
         Get elements that match the given condition.
-        
+
         :param path: The path to search in.
         :param condition: A callable that returns True if an element matches the condition.
         :return: An iterator of matching elements.
@@ -55,7 +56,7 @@ class CollectionPath:
     def _get_files(self, path: Path) -> Iterator[Path]:
         """
         Get all files in the given path.
-        
+
         :param path: The path to search in.
         :return: An iterator of file paths.
         """
@@ -64,7 +65,7 @@ class CollectionPath:
     def _get_folders(self, path: Path) -> Iterator[Path]:
         """
         Get all folders in the given path.
-        
+
         :param path: The path to search in.
         :return: An iterator of folder paths.
         """
@@ -73,7 +74,7 @@ class CollectionPath:
     def collect_all(self) -> Set[Path]:
         """
         Collect all files and folders recursively.
-        
+
         :return: A set of unique file and folder paths.
         """
         return self._recursive_collect(self._path)
@@ -81,7 +82,7 @@ class CollectionPath:
     def get_folders(self) -> List[Path]:
         """
         Get all folders in the current path.
-        
+
         :return: A list of folder paths.
         """
         return list(self._get_folders(self._path))
@@ -89,7 +90,7 @@ class CollectionPath:
     def get_files(self) -> List[Path]:
         """
         Get all files in the current path.
-        
+
         :return: A list of file paths.
         """
         return list(self._get_files(self._path))
@@ -98,7 +99,7 @@ class CollectionPath:
     def exists(self) -> bool:
         """
         Check if the path exists.
-        
+
         :return: True if the path exists, False otherwise.
         """
         return self._path.exists()
@@ -112,7 +113,7 @@ class CollectionPath:
     def map(self, function: Callable[[str], None]):
         """
         Apply a function to each file in the current path.
-        
+
         :param function: A callable that takes a file path as an argument.
         """
         files = self.get_files()
@@ -123,7 +124,7 @@ class CollectionPath:
     def __str__(self) -> str:
         """
         Get the string representation of the path.
-        
+
         :return: The string representation of the path.
         """
         return str(self._path)

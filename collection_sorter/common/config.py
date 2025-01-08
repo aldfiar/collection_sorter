@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Callable
+from typing import Callable, Optional
+
 
 @dataclass
 class SortConfig:
     """Configuration for sorting operations."""
+
     source_path: Path
     destination_path: Optional[Path] = None
     archive: bool = False

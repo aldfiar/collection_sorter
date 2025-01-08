@@ -10,9 +10,19 @@ from manga.manga_sorter import MangaSorter
 def manga_sort_options():
     usage = "%prog -d destination  source1 source 2"
     parser = OptionParser(usage=usage)
-    parser.add_option('-a', "--archive", help='Zip files', dest="archive", action="store_true")
-    parser.add_option('-m', "--move", help='Remove from source', dest="move", action="store_true")
-    parser.add_option('-d', "--destination", help='Destination folder', dest="destination", default=None)
+    parser.add_option(
+        "-a", "--archive", help="Zip files", dest="archive", action="store_true"
+    )
+    parser.add_option(
+        "-m", "--move", help="Remove from source", dest="move", action="store_true"
+    )
+    parser.add_option(
+        "-d",
+        "--destination",
+        help="Destination folder",
+        dest="destination",
+        default=None,
+    )
 
     options, args = parser.parse_args()
 

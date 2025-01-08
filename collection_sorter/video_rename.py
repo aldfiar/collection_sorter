@@ -1,11 +1,11 @@
 import logging
-import uuid
 import re
+import uuid
 from optparse import OptionParser
 from pathlib import Path
 from typing import List
 
-from .common.sorter import SortExecutor, BaseCollection, MultiThreadTask
+from .common.sorter import BaseCollection, MultiThreadTask, SortExecutor
 
 
 def rename_sort_options():
@@ -31,13 +31,13 @@ def rename_video():
 
 
 def remove_brackets(filename):
-    result = ''
+    result = ""
     inside_brackets = 0
 
     for char in filename:
-        if char in '([':
+        if char in "([":
             inside_brackets += 1
-        elif char in ')]':
+        elif char in ")]":
             inside_brackets -= 1
         elif inside_brackets == 0:
             result += char
@@ -46,7 +46,7 @@ def remove_brackets(filename):
 
 
 def rename_function(filename):
-    splited = filename.split('.')
+    splited = filename.split(".")
     extension = splited[-1]
     name = splited[0].replace("-", "")
     if "@" in name:
@@ -54,15 +54,15 @@ def rename_function(filename):
     brackets_removed = remove_brackets(name)
     name_parts = re.split("_| ", brackets_removed)
 
-    title = ''
-    episode = ''
+    title = ""
+    episode = ""
 
     for part in name_parts:
         if part.isdigit():
             episode = part
             break
         else:
-            title += part + ' '
+            title += part + " "
     updated = title.strip()
     if episode:
         result = f"{updated} - {episode}.{extension}"
@@ -72,7 +72,9 @@ def rename_function(filename):
 
 
 class SomeStrange(MultiThreadTask):
-    def __init__(self, template=None, archive=False, replace_function=None, remove=False) -> None:
+    def __init__(
+        self, template=None, archive=False, replace_function=None, remove=False
+    ) -> None:
         super().__init__()
         self._template = template
         self._archive = archive
@@ -83,7 +85,7 @@ class SomeStrange(MultiThreadTask):
         collection = BaseCollection(source)
 
         root_name = source.name
-        info = {'root': root_name}
+        info = {"root": root_name}
         files = collection.collect_all()
 
         def rename_closure(path: Path):

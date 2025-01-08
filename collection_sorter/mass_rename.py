@@ -4,7 +4,7 @@ from optparse import OptionParser
 from pathlib import Path
 from typing import List
 
-from .common.sorter import SortExecutor, BaseCollection, MultiThreadTask
+from .common.sorter import BaseCollection, MultiThreadTask, SortExecutor
 
 
 def rename_sort_options():
@@ -30,7 +30,9 @@ def rename_main():
 
 
 class SomeStrange(MultiThreadTask):
-    def __init__(self, template=None, archive=False, replace_function=None, remove=False) -> None:
+    def __init__(
+        self, template=None, archive=False, replace_function=None, remove=False
+    ) -> None:
         super().__init__()
         self._template = template
         self._archive = archive
@@ -41,7 +43,7 @@ class SomeStrange(MultiThreadTask):
         collection = BaseCollection(source)
 
         root_name = source.name
-        info = {'root': root_name}
+        info = {"root": root_name}
         files = collection.collect_all()
 
         def rename_function(path: Path):

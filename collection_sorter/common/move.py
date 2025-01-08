@@ -1,15 +1,18 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Callable
-import shutil
+
 from .files import CollectionPath
 
-logger = logging.getLogger('move')
+logger = logging.getLogger("move")
 
 
 class MovableCollection(CollectionPath):
 
-    def _change(self, new_path: Path, command: Callable[[Path, Path], None]) -> CollectionPath:
+    def _change(
+        self, new_path: Path, command: Callable[[Path, Path], None]
+    ) -> CollectionPath:
         if not new_path.exists():
             new_path.mkdir(parents=True, mode=755)
 
@@ -18,7 +21,7 @@ class MovableCollection(CollectionPath):
             destination_path = new_path.joinpath(file.name).resolve()
             command(source_path, destination_path)
 
-        logger.info(f'{command.__name__} from: {self._path} to: {new_path}')
+        logger.info(f"{command.__name__} from: {self._path} to: {new_path}")
 
         return CollectionPath(new_path)
 

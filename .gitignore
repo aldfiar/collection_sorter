@@ -1,3 +1,5 @@
 # Ignore aider files
 aider/
 *.aider
+.aider*
+.env

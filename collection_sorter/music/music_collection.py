@@ -1,13 +1,21 @@
 from collections import namedtuple
 from pathlib import Path
-from typing import List, Callable, Union
-
+from typing import Callable, List, Union
 
 from collection_sorter.common.files import CollectionPath
 
-support_extension = ['mp3', 'wma', 'flac',
-                     '.wav', 'mc', 'aac', 'm4a',
-                     'ape', 'dsf', 'dff']
+support_extension = [
+    "mp3",
+    "wma",
+    "flac",
+    ".wav",
+    "mc",
+    "aac",
+    "m4a",
+    "ape",
+    "dsf",
+    "dff",
+]
 
 
 def has_music_extension(path: Path) -> bool:
@@ -21,7 +29,7 @@ def has_music_extension(path: Path) -> bool:
     return is_extension
 
 
-MusicFile = namedtuple('MusicFile', ['file', 'tag'])
+MusicFile = namedtuple("MusicFile", ["file", "tag"])
 
 
 class MusicCollection(CollectionPath):

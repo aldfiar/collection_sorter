@@ -1,8 +1,8 @@
 import logging
 import re
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
-logger = logging.getLogger('manga')
+logger = logging.getLogger("manga")
 brackets = {"(", ")", "[", "]", "{", "}"}
 
 
@@ -24,7 +24,7 @@ class MangaParser(object):
                     last = True
                     li = index
             if last:
-                tag = tag_string[fi + 1: li]
+                tag = tag_string[fi + 1 : li]
                 tags.append(tag.strip())
                 last = False
                 first = False
@@ -47,8 +47,8 @@ class MangaParser(object):
         else:
             author = author_data.strip()
 
-        if '.' in author:
-            author = author.replace('.', "")
+        if "." in author:
+            author = author.replace(".", "")
 
         return author, group
 
@@ -59,7 +59,7 @@ class MangaParser(object):
         if result:
             manga_name = result.group(0)
             index = manga_data.find(manga_name)
-            tag_string = manga_data[index + len(manga_name):]
+            tag_string = manga_data[index + len(manga_name) :]
             tags = MangaParser._extract_tags(tag_string)
             name = manga_name.strip()
         else:
@@ -77,7 +77,7 @@ class MangaParser(object):
                 break
             index += 1
         if find_digit:
-            author = name[0:index - 1]
+            author = name[0 : index - 1]
         else:
             author = name
 
@@ -96,21 +96,23 @@ class MangaParser(object):
         author_tag_start = filename.find("[")
         author_tag_end = filename.find("]")
         is_found = author_tag_end != -1 and author_tag_start != -1
-        author_at_start = author_tag_start == 0 or (info_at_start and author_tag_start - info_tag_end <= 2)
+        author_at_start = author_tag_start == 0 or (
+            info_at_start and author_tag_start - info_tag_end <= 2
+        )
         if is_found and author_at_start:
-            author_data = filename[author_tag_start + 1:author_tag_end].strip()
+            author_data = filename[author_tag_start + 1 : author_tag_end].strip()
             author, group = MangaParser._extract_author_string(author_data)
             parsed["author"] = author
             parsed["group"] = group
-            manga_data = filename[author_tag_end + 1:]
+            manga_data = filename[author_tag_end + 1 :]
         else:
             manga_data = filename
 
         name, tags = MangaParser._extract_data(manga_data)
-        parsed['name'] = name
-        parsed['tags'] = tags
+        parsed["name"] = name
+        parsed["tags"] = tags
 
-        if 'author' not in parsed:
+        if "author" not in parsed:
             author = MangaParser._monthly_manga(name)
             parsed["author"] = author
 

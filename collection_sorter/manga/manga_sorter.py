@@ -1,4 +1,5 @@
 import logging
+import shutil
 from pathlib import Path
 from typing import Callable, Optional, Type, Dict, Any
 
@@ -99,13 +100,16 @@ class MangaSorter(MultiThreadTask):
             destination=destination,
         )
 
-    def execute(self, source: Path, destination: Path) -> None:
+    def execute(self, source: Path, destination: Optional[Path] = None) -> None:
         """Execute the sorting operation.
         
         Args:
             source: Source path to process
             destination: Destination for processed files
         """
+        if not destination:
+            raise ValueError("Destination path is required")
+            
         from collection_sorter.common.config import SortConfig
         
         # Create config for this execution
@@ -144,16 +148,16 @@ class MangaSorter(MultiThreadTask):
                         archive_path = manga_collection.archive_directory(
                             destination=manga_destination,
                             new_name=new_name
-                        )
+                        )._path
                         if self._remove and archive_path.exists():
                             manga_collection.delete()
                     else:
                         # Move or copy the directory
                         dest_path = manga_destination / new_name
                         if self._remove:
-                            manga_collection.move(dest_path)
+                            shutil.move(str(directory), str(dest_path))
                         else:
-                            manga_collection.copy(dest_path)
+                            shutil.copytree(str(directory), str(dest_path))
                             
                 except Exception as e:
                     logger.error(f"Failed to process directory {directory}: {str(e)}")

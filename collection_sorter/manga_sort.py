@@ -45,7 +45,6 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
     dest_path.mkdir(parents=True, exist_ok=True)
     
     task = MangaSorter(archive=archive, remove=move)
-    sorter = SortExecutor()
     
     for src in source:
         src_path = Path(src)
@@ -53,11 +52,6 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
             logging.warning(f"Source path does not exist: {src}")
             continue
             
-        collection = BaseCollection(src_path)
-        sorter.sort(
-            collection=collection,
-            destination=str(dest_path),
-            task=task
-        )
+        task.execute(src_path, dest_path)
 
 

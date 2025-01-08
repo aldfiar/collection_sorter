@@ -30,12 +30,34 @@ def manga_sort_options():
 
 
 def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
+    """Sort manga files from source directories into destination.
+    
+    Args:
+        source: List of source directory paths
+        destination: Destination directory path
+        archive: Whether to create archives
+        move: Whether to remove source files
+    """
     logging.info(f"Get source: {source}, destination: {destination}")
+    
+    # Create destination directory if it doesn't exist
+    dest_path = Path(destination)
+    dest_path.mkdir(parents=True, exist_ok=True)
+    
     task = MangaSorter(archive=archive, remove=move)
     sorter = SortExecutor()
-    for element in source:
-        root = Path(element)
-        collection = BaseCollection(root)
-        sorter.sort(collection=collection, destination=destination, task=task)
+    
+    for src in source:
+        src_path = Path(src)
+        if not src_path.exists():
+            logging.warning(f"Source path does not exist: {src}")
+            continue
+            
+        collection = BaseCollection(src_path)
+        sorter.sort(
+            collection=collection,
+            destination=str(dest_path),
+            task=task
+        )
 
 

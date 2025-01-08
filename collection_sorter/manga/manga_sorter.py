@@ -122,38 +122,43 @@ class MangaSorter(MultiThreadTask):
             
             # Process each directory in the source
             for directory in collection.get_folders():
-                # Parse manga info from directory name
-                manga_info = self._parser.parse(directory.name)
-                
-                # Create destination directory for this author
-                manga_destination = self._create_destination(
-                    destination, manga_info["author"]
-                )
-
-                # Create a collection for this specific manga directory
-                manga_collection = MangaCollection(directory)
-                
-                # Generate new name from manga info
-                new_name = self._template(
-                    manga_info, symbol_replace_function=self._replace_function
-                )
-                
-                if self._archive:
-                    # Archive the directory
-                    manga_collection.archive_directory(
-                        destination=manga_destination,
-                        new_name=new_name
+                try:
+                    # Parse manga info from directory name
+                    manga_info = self._parser.parse(directory.name)
+                    
+                    # Create destination directory for this author
+                    manga_destination = self._create_destination(
+                        destination, manga_info["author"]
                     )
-                    if self._remove:
-                        manga_collection.delete()
-                else:
-                    # Move or copy the directory
-                    dest_path = manga_destination / new_name
-                    if self._remove:
-                        manga_collection.move(dest_path)
+                    
+                    # Create a collection for this specific manga directory
+                    manga_collection = MangaCollection(directory)
+                    
+                    # Generate new name from manga info
+                    new_name = self._template(
+                        manga_info, symbol_replace_function=self._replace_function
+                    )
+                    
+                    if self._archive:
+                        # Archive the directory
+                        archive_path = manga_collection.archive_directory(
+                            destination=manga_destination,
+                            new_name=new_name
+                        )
+                        if self._remove and archive_path.exists():
+                            manga_collection.delete()
                     else:
-                        manga_collection.copy(dest_path)
-                
+                        # Move or copy the directory
+                        dest_path = manga_destination / new_name
+                        if self._remove:
+                            manga_collection.move(dest_path)
+                        else:
+                            manga_collection.copy(dest_path)
+                            
+                except Exception as e:
+                    logger.error(f"Failed to process directory {directory}: {str(e)}")
+                    continue
+                    
         except Exception as e:
             logger.error(f"Failed to process {source}: {str(e)}")
             raise

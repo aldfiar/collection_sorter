@@ -26,8 +26,12 @@ class TestMovableCollection(unittest.TestCase):
 
     def tearDown(self):
         # Clean up the temporary directories
-        shutil.rmtree(self.test_dir)
-        shutil.rmtree(self.dest_dir)
+        for path in [self.test_dir, self.dest_dir]:
+            try:
+                if path.exists():
+                    shutil.rmtree(path, ignore_errors=True)
+            except Exception:
+                pass
 
     def test_copy_files(self):
         """Test copying files to a new location"""

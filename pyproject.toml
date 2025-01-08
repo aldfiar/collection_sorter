@@ -2,11 +2,11 @@
 name = "collection_sorter"
 version = "0.1.0"
 description = "A command-line tool for organizing and processing various file collections"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Ivan Shchekoldin <darthmantis@yandex.ru>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/yourusername/collection-sorter"
-repository = "https://github.com/yourusername/collection-sorter"
+homepage = "https://github.com/aldfiar/collection-sorter"
+repository = "https://github.com/aldfiar/collection-sorter"
 keywords = ["file-management", "cli", "organization"]
 classifiers = [
     "Development Status :: 4 - Beta",

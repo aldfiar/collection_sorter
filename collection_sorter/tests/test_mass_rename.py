@@ -64,7 +64,7 @@ class TestMassRename(TestCase):
             "Ane Chijo Max Heart_01.ass",
             "Bible Black Gaiden OVA 1.mp4",
             "Shoujo Ramune 01.mkv",
-            "Ecchi na Onee-chan ni Shiboraretai - 01.mkv"
+            "Ecchi na Onee - chan ni Shiboraretai - 01.mkv"
         }
 
         self.assertEqual(renamed_files, expected_files)

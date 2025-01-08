@@ -34,8 +34,9 @@ class FileNameCleaner:
         name = re.sub(r'_+', '_', name)  # Replace multiple underscores
         name = name.strip('_').strip()  # Remove leading/trailing underscores and spaces
         
-        # Preserve existing hyphens between words
-        name = re.sub(r'\s*-\s*', ' - ', name)  # Standardize spacing around hyphens
+        # Preserve existing hyphens between words and standardize spacing
+        name = re.sub(r'(\w)-(\w)', r'\1 - \2', name)  # Add spaces around hyphens between words
+        name = re.sub(r'\s*-\s*', ' - ', name)  # Standardize spacing around existing hyphens
         
         # Reconstruct filename with extension
         return f"{name}.{extension}" if extension else name

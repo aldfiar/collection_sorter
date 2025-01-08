@@ -4,8 +4,25 @@ A command-line tool for organizing and processing various file collections, incl
 
 ## Installation
 
+### Using pip
 ```bash
 pip install collection-sorter
+```
+
+### Using Poetry (recommended)
+```bash
+# Install Poetry if you haven't already
+curl -sSL https://install.python-poetry.org | python3 -
+
+# Clone the repository
+git clone https://github.com/yourusername/collection-sorter.git
+cd collection-sorter
+
+# Install with Poetry
+poetry install
+
+# Activate the virtual environment
+poetry shell
 ```
 
 ## Usage

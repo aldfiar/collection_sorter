@@ -8,13 +8,13 @@ from collection_sorter.common.files import CollectionPath
 class TestCollectionPath(unittest.TestCase):
     def setUp(self):
         # Create a temporary directory
-        self.test_dir = Path(tempfile.mkdtemp())
+        self.test_dir = Path(tempfile.mkdtemp()).resolve()
         
         # Create test file structure
-        self.file1 = self.test_dir / "file1.txt"
-        self.file2 = self.test_dir / "file2.txt"
-        self.subdir = self.test_dir / "subdir"
-        self.subfile = self.subdir / "subfile.txt"
+        self.file1 = (self.test_dir / "file1.txt").resolve()
+        self.file2 = (self.test_dir / "file2.txt").resolve()
+        self.subdir = (self.test_dir / "subdir").resolve()
+        self.subfile = (self.subdir / "subfile.txt").resolve()
         
         # Create the files and directories
         self.file1.touch()

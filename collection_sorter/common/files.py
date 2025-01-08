@@ -14,7 +14,7 @@ class CollectionPath:
     """
 
     def __init__(self, path: Union[Path, str]) -> None:
-        self._path = Path(path).expanduser().resolve(strict=True)
+        self._path = Path(path).expanduser().resolve()
 
     @property
     def path(self) -> Path:

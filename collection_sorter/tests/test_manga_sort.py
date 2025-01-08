@@ -70,7 +70,7 @@ class TestMangaSort(TestCase):
         self.assertFalse((self.source_dir / TEST_MANGAS[0]).exists())
         
         # Check if files exist in destination
-        self.assertTrue((self.dest_dir / "Zanzi" / "GRANCHANGE FANTASY").exists())
+        self.assertTrue((self.dest_dir / "Starlight" / "Mystic Forest Symphony").exists())
 
     def test_manga_sort_with_archive(self):
         """Test manga sorting with archive option"""
@@ -82,8 +82,8 @@ class TestMangaSort(TestCase):
         )
 
         # Check if zip files were created
-        self.assertTrue(list(Path(self.dest_dir / "Zanzi").glob("*.zip")))
-        self.assertTrue(list(Path(self.dest_dir / "MUK").glob("*.zip")))
+        self.assertTrue(list(Path(self.dest_dir / "Starlight").glob("*.zip")))
+        self.assertTrue(list(Path(self.dest_dir / "Nightwhisper").glob("*.zip")))
 
     def test_manga_sort_with_archive_and_move(self):
         """Test manga sorting with both archive and move options"""
@@ -98,7 +98,7 @@ class TestMangaSort(TestCase):
         self.assertFalse((self.source_dir / TEST_MANGAS[0]).exists())
         
         # Check if zip files were created
-        self.assertTrue(list(Path(self.dest_dir / "Zanzi").glob("*.zip")))
+        self.assertTrue(list(Path(self.dest_dir / "Starlight").glob("*.zip")))
 
     def test_author_folders(self):
         """Test processing of author folders containing multiple manga"""
@@ -127,8 +127,8 @@ class TestMangaSort(TestCase):
         self.assertTrue(author_dest.is_dir())
 
         # Check if manga directories were properly sorted within author directory
-        self.assertTrue((author_dest / "GRANCHANGE FANTASY").exists())
-        self.assertTrue((author_dest / "Having Sex With Your Little Sister That's Gross!").exists())
+        self.assertTrue((author_dest / "Mystic Forest Symphony").exists())
+        self.assertTrue((author_dest / "Ethereal Wings & Stardust").exists())
 
     def test_author_folders_with_archive(self):
         """Test author folders processing with archive option"""

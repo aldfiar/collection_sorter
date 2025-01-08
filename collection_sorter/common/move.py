@@ -11,8 +11,10 @@ logger = logging.getLogger("move")
 class MovableCollection(CollectionPath):
 
     def _change(
-        self, new_path: Path, command: Callable[[Path, Path], None]
-    ) -> CollectionPath:
+        self, 
+        new_path: Path, 
+        command: Callable[[Path, Path], None]
+    ) -> "CollectionPath":
         if not new_path.exists():
             new_path.mkdir(parents=True, mode=0o755)
 

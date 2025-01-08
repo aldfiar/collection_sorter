@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import threading
 from functools import partial
@@ -7,8 +8,11 @@ from typing import Optional
 
 from .archive import ArchivedCollection
 from .config import SortConfig
+from .exceptions import ConfigurationError, FileOperationError, ThreadingError
 from .files import CollectionPath
 from .move import MovableCollection
+
+logger = logging.getLogger(__name__)
 
 
 class BaseCollection(MovableCollection, ArchivedCollection):

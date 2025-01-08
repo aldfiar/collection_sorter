@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 import unittest
 
+from collection_sorter.common.archive import ArchivedCollection
+
 from collection_sorter.mass_zip import ZipCollections, zip_collections, parse_args
 
 
@@ -39,9 +41,14 @@ class TestMassZip(unittest.TestCase):
             sources=[str(self.source_dir)],
             destination=str(self.dest_dir)
         )
-        # Check if zip file was created
+        # Check if zip file was created and is valid
         zip_files = list(self.dest_dir.glob("*.zip"))
         self.assertEqual(len(zip_files), 1)
+        self.assertTrue(zip_files[0].stat().st_size > 0)
+        
+        # Verify it's a valid archive
+        collection = ArchivedCollection(zip_files[0])
+        self.assertTrue(collection.is_archive())
 
     def test_zip_collections_with_move(self):
         zip_collections(

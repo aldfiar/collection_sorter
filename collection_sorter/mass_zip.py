@@ -3,8 +3,9 @@ import argparse
 from pathlib import Path
 from typing import List, Optional, Sequence
 
-from collection_sorter.common.sorter import BaseCollection, MultiThreadTask, SortExecutor
+from collection_sorter.common.sorter import MultiThreadTask, SortExecutor
 from collection_sorter.common.config import SortConfig
+from collection_sorter.common.archive import ArchivedCollection
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class ZipCollections(MultiThreadTask):
             raise FileNotFoundError(f"Source directory not found: {source}")
             
         try:
-            collection = BaseCollection(source)
+            collection = ArchivedCollection(source)
             logger.info(f"Processing collection: {source}")
             collection = collection.archive_folders(zip_parent=True)
             logger.info(f"Successfully archived: {source}")
@@ -115,7 +116,7 @@ def zip_collections(
     for source in sources:
         try:
             root = Path(source)
-            collection = BaseCollection(root)
+            collection = ArchivedCollection(root)
             sorter.sort(
                 collection=collection,
                 destination=Path(destination) if destination else None,

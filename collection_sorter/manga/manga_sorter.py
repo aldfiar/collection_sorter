@@ -40,7 +40,12 @@ class MangaSorter(MultiThreadTask):
             remove: Whether to remove source files after processing
         """
         from collection_sorter.common.config import SortConfig
-        config = SortConfig(archive=archive, remove_source=remove)
+        # Initialize with a dummy path that will be replaced during execute()
+        config = SortConfig(
+            source_path=Path("."),
+            archive=archive,
+            remove_source=remove
+        )
         super().__init__(config=config)
         if not callable(template):
             raise ValueError("Template must be a callable")

@@ -39,14 +39,8 @@ class MangaSorter(MultiThreadTask):
             parser: Class to parse manga filenames
             remove: Whether to remove source files after processing
         """
-        from collection_sorter.common.config import SortConfig
-        # Initialize with a dummy path that will be replaced during execute()
-        config = SortConfig(
-            source_path=Path("."),
-            archive=archive,
-            remove_source=remove
-        )
-        super().__init__(config=config)
+        super().__init__()
+        self._config = None
         if not callable(template):
             raise ValueError("Template must be a callable")
         
@@ -105,6 +99,17 @@ class MangaSorter(MultiThreadTask):
             source: Source path to process
             destination: Destination for processed files
         """
+        from collection_sorter.common.config import SortConfig
+        
+        # Create config for this execution
+        self._config = SortConfig(
+            source_path=source,
+            destination_path=destination,
+            archive=self._archive,
+            remove_source=self._remove,
+            rename_function=self._replace_function
+        )
+        
         try:
             collection = MangaCollection(source)
             
@@ -126,12 +131,21 @@ class MangaSorter(MultiThreadTask):
                     manga_info, symbol_replace_function=self._replace_function
                 )
                 
-                # Process the directory
-                self._directory_action(
-                    name=new_name,
-                    collection=manga_collection,
-                    destination=manga_destination,
-                )
+                if self._archive:
+                    # Archive the directory
+                    manga_collection.archive_directory(
+                        destination=manga_destination,
+                        new_name=new_name
+                    )
+                    if self._remove:
+                        manga_collection.delete()
+                else:
+                    # Move or copy the directory
+                    dest_path = manga_destination / new_name
+                    if self._remove:
+                        manga_collection.move(dest_path)
+                    else:
+                        manga_collection.copy(dest_path)
                 
         except Exception as e:
             logger.error(f"Failed to process {source}: {str(e)}")

@@ -26,8 +26,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'mangasort = collection_sorter:manga_sort_main',
-            'collection_sort = collection_sorter:mass_rename_main',
+            'collection-sorter = collection_sorter.cli:main',
         ]
     },
     tests_require=['pytest'],

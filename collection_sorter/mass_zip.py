@@ -56,10 +56,3 @@ def zip_collections(source: List[str], destination: str, archive: bool, move: bo
         sorter.sort(collection=collection, destination=destination, task=task)
 
 
-def manga_sort_main():
-    options, args = zip_sort_options()
-    zip_collections(args, options.destination, options.archive, options.move)
-
-
-if __name__ == "__main__":
-    manga_sort_main()

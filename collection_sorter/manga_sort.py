@@ -39,10 +39,3 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool):
         sorter.sort(collection=collection, destination=destination, task=task)
 
 
-def manga_sort_main():
-    options, args = manga_sort_options()
-    manga_sort(args, options.destination, options.archive, options.move)
-
-
-if __name__ == "__main__":
-    manga_sort_main()

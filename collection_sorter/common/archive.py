@@ -11,7 +11,7 @@ logger = logging.getLogger("archive")
 class ArchivedCollection(CollectionPath):
 
     def is_archive(self):
-        return self._path.exists() and self._path.is_file()
+        return self._path.exists() and self._path.is_file() and self._path.suffix.lower() == '.zip'
 
     def archive_directory(
         self, destination: Path = None, new_name=None
@@ -53,7 +53,7 @@ class ArchivedCollection(CollectionPath):
     def archive_folders(self, zip_parent=False) -> "ArchivedCollection":
         folders = self.get_folders()
         for directory in folders:
-            self.archive_directory(directory)
+            ArchivedCollection(directory).archive_directory(self._path)
         if zip_parent:
             self.archive_directory(self._path.parent)
 

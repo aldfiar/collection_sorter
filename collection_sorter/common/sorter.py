@@ -61,19 +61,39 @@ class SortExecutor:
             task: The task to execute
 
         Raises:
-            ValueError: If no task is provided
+            ConfigurationError: If no task is provided or configuration is invalid
+            ThreadingError: If thread pool operations fail
+            FileOperationError: If file operations fail
         """
         if task is None:
-            raise ValueError("A task must be provided")
+            raise ConfigurationError("A task must be provided")
+
+        if not collection.exists:
+            raise FileOperationError(f"Source collection does not exist: {collection}")
 
         if destination:
             destination = Path(destination)
-            with self._lock:
-                destination.mkdir(parents=True, exist_ok=True)
+            try:
+                with self._lock:
+                    destination.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                raise FileOperationError(f"Failed to create destination directory: {str(e)}") from e
 
         directories = collection.get_folders() or [collection.path]
+        logger.info(f"Starting sort operation with {len(directories)} directories")
 
         try:
-            self._pool.map(partial(task.execute, destination=destination), directories)
+            results = self._pool.map_async(
+                partial(task.execute, destination=destination), 
+                directories
+            )
+            results.wait(timeout=3600)  # 1 hour timeout
+            if not results.successful():
+                raise ThreadingError("Sort operation failed to complete successfully")
+        except Exception as e:
+            raise ThreadingError(f"Thread pool operation failed: {str(e)}") from e
         finally:
             self._pool.close()
+            self._pool.join()
+            
+        logger.info("Sort operation completed successfully")

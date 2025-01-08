@@ -161,11 +161,11 @@ class MangaSorter(MultiThreadTask):
                     
                     if self._archive:
                         # Archive the directory
-                        archive_path = manga_collection.archive_directory(
+                        archive = manga_collection.archive_directory(
                             destination=manga_destination,
                             new_name=new_name
-                        )._path
-                        if self._remove and archive_path.exists():
+                        )
+                        if self._remove and archive.exists:
                             manga_collection.delete()
                     else:
                         # Move or copy the directory

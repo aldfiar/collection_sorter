@@ -9,6 +9,14 @@ brackets = {"(", ")", "[", "]", "{", "}"}
 class MangaParser(object):
     @staticmethod
     def _extract_tags(tag_string: str) -> List[str]:
+        """Extract tags from a string containing bracketed sections.
+        
+        Args:
+            tag_string: String containing tags in brackets
+            
+        Returns:
+            List of extracted tag strings
+        """
         tags = list()
         fi = 0
         li = 0
@@ -84,7 +92,7 @@ class MangaParser(object):
         return author.strip()
 
     @staticmethod
-    def parse(filename) -> Dict[str, Any]:
+    def parse(filename: str) -> Dict[str, Any]:
         parsed = {}
         info_at_start = False
 

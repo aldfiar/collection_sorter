@@ -29,8 +29,14 @@ class CollectionPath:
         """
         Recursively collect all files and folders in the given path.
 
-        :param path: The path to start collecting from.
-        :return: A set of unique paths.
+        Args:
+            path: The path to start collecting from.
+            
+        Returns:
+            Set[Path]: A set of unique paths found recursively
+            
+        Raises:
+            FileOperationError: If path access fails
         """
         cur_files = self._get_files(path)
         unique_files = set(cur_files)

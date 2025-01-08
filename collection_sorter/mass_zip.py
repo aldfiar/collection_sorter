@@ -65,10 +65,10 @@ class ZipCollections(MultiThreadTask):
             archive: Whether to create nested archives
             remove: Whether to remove source files after processing
         """
-        config = SortConfig()
-        super().__init__(config=config)
         self._archive = archive
         self._remove = remove
+        # Config will be initialized in execute() when we have the source path
+        self._config = None
 
     def execute(self, source: Path, destination: Optional[Path] = None) -> None:
         """Execute the zip operation on a single source.
@@ -82,6 +82,11 @@ class ZipCollections(MultiThreadTask):
         """
         if not source.exists():
             raise FileNotFoundError(f"Source directory not found: {source}")
+        
+        # Initialize config with source path
+        if self._config is None:
+            self._config = SortConfig(source_path=source)
+            super().__init__(config=self._config)
             
         try:
             collection = ArchivedCollection(source)

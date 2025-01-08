@@ -64,3 +64,20 @@ class TestManga(TestCase):
             self.assertEqual(names[counter], info['name'])
             self.assertIn(groups[counter], info['group'])
             counter += 1
+            
+    def test_manga_sorter_validation(self):
+        with self.assertRaises(ValueError):
+            from collection_sorter.manga.manga_sorter import MangaSorter
+            MangaSorter(template="not a function")
+            
+    def test_manga_sorter_error_handling(self):
+        from collection_sorter.manga.manga_sorter import MangaSorter
+        with tempfile.TemporaryDirectory() as tmpdir:
+            src = Path(tmpdir) / "source"
+            dst = Path(tmpdir) / "dest"
+            src.mkdir()
+            
+            sorter = MangaSorter()
+            with self.assertRaises(Exception):
+                # Should raise when source doesn't contain valid manga
+                sorter.execute(src, dst)

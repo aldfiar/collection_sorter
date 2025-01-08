@@ -107,25 +107,29 @@ class MangaSorter(MultiThreadTask):
         """
         try:
             collection = MangaCollection(source)
-            manga_info = self._parser.parse(source.name)
             
-            manga_destination = self._create_destination(
-                destination, manga_info["author"]
-            )
+            # Process each directory in the source
+            for directory in collection.get_folders():
+                # Parse manga info from directory name
+                manga_info = self._parser.parse(directory.name)
+                
+                # Create destination directory for this author
+                manga_destination = self._create_destination(
+                    destination, manga_info["author"]
+                )
 
-            directories = collection.get_folders()
-            if directories:
-                for directory in directories:
-                    self._process_directory(
-                        directory, manga_info, collection, manga_destination
-                    )
-            else:
+                # Create a collection for this specific manga directory
+                manga_collection = MangaCollection(directory)
+                
+                # Generate new name from manga info
                 new_name = self._template(
                     manga_info, symbol_replace_function=self._replace_function
                 )
+                
+                # Process the directory
                 self._directory_action(
                     name=new_name,
-                    collection=collection,
+                    collection=manga_collection,
                     destination=manga_destination,
                 )
                 

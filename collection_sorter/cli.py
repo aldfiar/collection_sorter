@@ -31,6 +31,9 @@ def create_parser():
     # Mass rename command
     rename_parser = subparsers.add_parser('rename', help='Batch rename files')
     rename_parser.add_argument('sources', nargs='+', help='Source directories')
+    rename_parser.add_argument('-d', '--destination', help='Destination directory')
+    rename_parser.add_argument('-a', '--archive', action='store_true', help='Create archives')
+    rename_parser.add_argument('-m', '--move', action='store_true', help='Remove source after processing')
     
     # Mass zip command
     zip_parser = subparsers.add_parser('zip', help='Create archives from collections')
@@ -42,6 +45,7 @@ def create_parser():
     # Video rename command
     video_parser = subparsers.add_parser('video', help='Rename video files')
     video_parser.add_argument('sources', nargs='+', help='Source directories')
+    video_parser.add_argument('-d', '--destination', help='Destination directory')
     
     return parser
 
@@ -64,7 +68,12 @@ def main():
             )
         
         elif args.command == 'rename':
-            rename_sort(source=args.sources)
+            rename_sort(
+                source=args.sources,
+                destination=args.destination,
+                archive=args.archive,
+                move=args.move
+            )
         
         elif args.command == 'zip':
             zip_collections(
@@ -75,7 +84,10 @@ def main():
             )
         
         elif args.command == 'video':
-            video_rename_sort(source=args.sources)
+            video_rename_sort(
+                source=args.sources,
+                destination=args.destination
+            )
             
     except Exception as e:
         logging.error(f"Error processing command {args.command}: {str(e)}")

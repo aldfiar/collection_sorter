@@ -112,29 +112,32 @@ def parse_args(args: Optional[List[str]] = None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def rename_files(sources: List[str]) -> None:
+def rename_sort(source: List[str], destination: str = None, archive: bool = False, move: bool = False) -> None:
     """
     Rename files in the given source paths.
     
     Args:
-        sources: List of source paths to process
+        source: List of source paths to process
+        destination: Optional destination path (unused in this implementation)
+        archive: Optional flag for archiving (unused in this implementation)
+        move: Optional flag for moving files (unused in this implementation)
     """
-    logger.info(f"Processing sources: {sources}")
+    logger.info(f"Processing sources: {source}")
     sorter = SortExecutor()
     task = FileRenameTask()
     
-    for source in sources:
+    for src in source:
         try:
-            collection = BaseCollection(source)
+            collection = BaseCollection(src)
             sorter.sort(collection=collection, task=task)
         except Exception as e:
-            logger.error(f"Failed to process {source}: {e}")
+            logger.error(f"Failed to process {src}: {e}")
 
 
 def main() -> None:
     """Main entry point for the script."""
     args = parse_args()
-    rename_files(args.sources)
+    rename_sort(args.sources)
 
 
 if __name__ == "__main__":

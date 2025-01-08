@@ -3,10 +3,10 @@ import logging
 from pathlib import Path
 from typing import List
 
-from .manga_sort import manga_sort
-from .mass_rename import rename_sort
-from .mass_zip import zip_collections
-from .video_rename import rename_sort as video_rename_sort
+from collection_sorter.manga_sort import manga_sort
+from collection_sorter.mass_rename import rename_sort
+from collection_sorter.mass_zip import zip_collections
+from collection_sorter.video_rename import rename_sort as video_rename_sort
 
 def setup_logging():
     logging.basicConfig(

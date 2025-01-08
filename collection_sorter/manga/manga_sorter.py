@@ -31,7 +31,7 @@ class MangaSorter(MultiThreadTask):
         remove: bool = False,
     ) -> None:
         """Initialize the manga sorter.
-        
+    
         Args:
             template: Function to format manga info into a filename
             archive: Whether to create archives instead of directories
@@ -39,7 +39,9 @@ class MangaSorter(MultiThreadTask):
             parser: Class to parse manga filenames
             remove: Whether to remove source files after processing
         """
-        super().__init__()
+        from collection_sorter.common.config import SortConfig
+        config = SortConfig(archive=archive, remove=remove)
+        super().__init__(config=config)
         if not callable(template):
             raise ValueError("Template must be a callable")
         

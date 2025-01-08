@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence
 
 from collection_sorter.common.sorter import BaseCollection, MultiThreadTask, SortExecutor
+from collection_sorter.common.config import SortConfig
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,8 @@ class ZipCollections(MultiThreadTask):
             archive: Whether to create nested archives
             remove: Whether to remove source files after processing
         """
-        super().__init__()
+        config = SortConfig()
+        super().__init__(config=config)
         self._archive = archive
         self._remove = remove
 

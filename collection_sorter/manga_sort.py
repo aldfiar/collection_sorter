@@ -70,8 +70,9 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool, a
             collection = BaseCollection(src_path)
             for manga_dir in collection.get_folders():
                 if manga_dir.is_dir():
-                    # Use original directory name to preserve full manga title
-                    dest_path = author_dest / manga_dir.name
+                    # Parse manga info to get clean name
+                    manga_info = MangaParser.parse(manga_dir.name)
+                    dest_path = author_dest / manga_info["name"]
                     if archive:
                         task.execute(manga_dir, author_dest)
                     else:

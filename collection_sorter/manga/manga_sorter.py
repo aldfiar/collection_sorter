@@ -122,6 +122,22 @@ class MangaSorter(MultiThreadTask):
             remove_source=self._remove,
             rename_function=self._replace_function
         )
+
+        if self._author_folders:
+            # When processing author folders, preserve original names
+            try:
+                if self._archive:
+                    collection = MangaCollection(source)
+                    collection.archive_directory(
+                        destination=destination,
+                        new_name=source.name.replace(" ", "_")
+                    )
+                    if self._remove:
+                        collection.delete()
+                return
+            except Exception as e:
+                logger.error(f"Failed to process author folder {source}: {str(e)}")
+                raise
         
         try:
             collection = MangaCollection(source)

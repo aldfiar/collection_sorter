@@ -64,10 +64,19 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool, a
             author_dest = dest_path / author_name
             author_dest.mkdir(parents=True, exist_ok=True)
             
-            # Process each subfolder as a manga
-            for manga_dir in src_path.iterdir():
+            # Process each subfolder as a manga, preserving original names
+            collection = BaseCollection(src_path)
+            for manga_dir in collection.get_folders():
                 if manga_dir.is_dir():
-                    task.execute(manga_dir, author_dest)
+                    # Use the manga directory name directly without parsing
+                    dest_path = author_dest / manga_dir.name
+                    if archive:
+                        task.execute(manga_dir, author_dest)
+                    else:
+                        if move:
+                            shutil.move(str(manga_dir), str(dest_path))
+                        else:
+                            shutil.copytree(str(manga_dir), str(dest_path))
         else:
             # Process normally as individual manga folders
             task.execute(src_path, dest_path)

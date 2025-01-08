@@ -4,9 +4,9 @@ from optparse import OptionParser
 from pathlib import Path
 from typing import List
 
-from common.sorter import BaseCollection, SortExecutor
-from manga.manga_sorter import MangaSorter
-from manga.manga import MangaParser
+from collection_sorter.common.sorter import BaseCollection, SortExecutor
+from collection_sorter.manga.manga_sorter import MangaSorter
+from collection_sorter.manga.manga import MangaParser
 
 
 def manga_sort_options():

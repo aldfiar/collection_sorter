@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 from typing import List, Optional, Sequence
 
-from collection_sorter import BaseCollection, MultiThreadTask, SortExecutor
+from collection_sorter.common.sorter import BaseCollection, MultiThreadTask, SortExecutor
 
 logger = logging.getLogger(__name__)
 

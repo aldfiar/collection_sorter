@@ -107,8 +107,11 @@ class TestMangaSort(TestCase):
         author_dir = self.source_dir / author_name
         author_dir.mkdir()
 
-        # Create multiple manga folders inside author directory
-        for manga_name in TEST_MANGAS[:2]:  # Use first two test mangas
+        # Create manga folders with proper author structure
+        manga1 = "(C90) [Moonweaver Studio (Starlight)] Mystic Forest Symphony"
+        manga2 = "(C94) [Dreamforge (Silverleaf)] Ethereal Wings & Stardust"
+        
+        for manga_name in [manga1, manga2]:
             manga_dir = author_dir / manga_name
             manga_dir.mkdir(parents=True)
             (manga_dir / "page1.jpg").touch()
@@ -136,8 +139,9 @@ class TestMangaSort(TestCase):
         author_dir = self.source_dir / author_name
         author_dir.mkdir()
 
-        # Create test manga directory
-        manga_dir = author_dir / TEST_MANGAS[0]
+        # Create test manga directory with proper structure
+        manga_name = "(C90) [Moonweaver Studio (Starlight)] Mystic Forest Symphony"
+        manga_dir = author_dir / manga_name
         manga_dir.mkdir(parents=True)
         (manga_dir / "page1.jpg").touch()
 

@@ -138,10 +138,8 @@ class MangaSorter(MultiThreadTask):
                     # Create a collection for this specific manga directory
                     manga_collection = MangaCollection(directory)
                     
-                    # Generate new name from manga info
-                    new_name = self._template(
-                        manga_info, symbol_replace_function=self._replace_function
-                    )
+                    # Use manga name directly from parsed info
+                    new_name = manga_info["name"]
                     
                     if self._archive:
                         # Archive the directory

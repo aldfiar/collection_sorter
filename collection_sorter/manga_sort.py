@@ -6,6 +6,7 @@ from typing import List
 
 from common.sorter import BaseCollection, SortExecutor
 from manga.manga_sorter import MangaSorter
+from manga.manga import MangaParser
 
 
 def manga_sort_options():
@@ -69,8 +70,9 @@ def manga_sort(source: List[str], destination: str, archive: bool, move: bool, a
             collection = BaseCollection(src_path)
             for manga_dir in collection.get_folders():
                 if manga_dir.is_dir():
-                    # Use the manga directory name directly without parsing
-                    dest_path = author_dest / manga_dir.name
+                    # Extract just the manga name from the full directory name
+                    manga_name = MangaParser.parse(manga_dir.name)["name"]
+                    dest_path = author_dest / manga_name
                     if archive:
                         task.execute(manga_dir, author_dest)
                     else:

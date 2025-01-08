@@ -99,3 +99,56 @@ class TestMangaSort(TestCase):
         
         # Check if zip files were created
         self.assertTrue(list(Path(self.dest_dir / "Zanzi").glob("*.zip")))
+
+    def test_author_folders(self):
+        """Test processing of author folders containing multiple manga"""
+        # Create author folder structure
+        author_name = "Test Author"
+        author_dir = self.source_dir / author_name
+        author_dir.mkdir()
+
+        # Create multiple manga folders inside author directory
+        for manga_name in TEST_MANGAS[:2]:  # Use first two test mangas
+            manga_dir = author_dir / manga_name
+            manga_dir.mkdir(parents=True)
+            (manga_dir / "page1.jpg").touch()
+
+        manga_sort(
+            source=[str(author_dir)],
+            destination=str(self.dest_dir),
+            archive=False,
+            move=False,
+            author_folders=True
+        )
+
+        # Check if author directory was created in destination
+        author_dest = self.dest_dir / author_name
+        self.assertTrue(author_dest.exists())
+        self.assertTrue(author_dest.is_dir())
+
+        # Check if manga directories were properly sorted within author directory
+        self.assertTrue((author_dest / "GRANCHANGE FANTASY").exists())
+        self.assertTrue((author_dest / "Having Sex With Your Little Sister That's Gross!").exists())
+
+    def test_author_folders_with_archive(self):
+        """Test author folders processing with archive option"""
+        author_name = "Test Author"
+        author_dir = self.source_dir / author_name
+        author_dir.mkdir()
+
+        # Create test manga directory
+        manga_dir = author_dir / TEST_MANGAS[0]
+        manga_dir.mkdir(parents=True)
+        (manga_dir / "page1.jpg").touch()
+
+        manga_sort(
+            source=[str(author_dir)],
+            destination=str(self.dest_dir),
+            archive=True,
+            move=False,
+            author_folders=True
+        )
+
+        # Check if zip files were created in author directory
+        author_dest = self.dest_dir / author_name
+        self.assertTrue(list(Path(author_dest).glob("*.zip")))

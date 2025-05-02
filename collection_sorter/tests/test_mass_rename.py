@@ -2,9 +2,18 @@ import os
 import tempfile
 from pathlib import Path
 from unittest import TestCase
+import warnings
 
-from collection_sorter.mass_rename import FileNameCleaner, FileRenameTask
-from collection_sorter.common.sorter import BaseCollection, SortExecutor
+# DEPRECATED TEST FILE
+# This test file is testing a legacy module that has been replaced.
+warnings.warn(
+    "test_mass_rename.py uses the deprecated mass_rename module. "
+    "Use the RenameProcessorTemplate from collection_sorter.common.templates_extensions "
+    "or RenameCommandHandler from collection_sorter.cli_handlers.rename_handler instead. "
+    "See test_rename_processor.py for the new tests.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 class TestMassRename(TestCase):
     def setUp(self):

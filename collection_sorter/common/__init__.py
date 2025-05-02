@@ -48,6 +48,33 @@ from .result_strategies import (
 )
 from .result_processor import ResultFileProcessor
 
+# Factory pattern modules
+from .factories import (
+    StrategyFactory,
+    ResultStrategyFactory,
+    DuplicateHandlerFactory,
+    ProcessorFactory,
+    ConfigBasedProcessorFactory,
+    create_strategy,
+    create_result_strategy,
+    create_duplicate_handler,
+    create_processor,
+    create_processor_from_config
+)
+
+# Template method pattern modules
+from .templates import (
+    FileProcessorTemplate,
+    FileMoveTemplate,
+    FileCopyTemplate,
+    FileRenameTemplate,
+    DirectoryProcessorTemplate,
+    DirectoryCopyTemplate,
+    DirectoryMoveTemplate,
+    ArchiveDirectoryTemplate,
+    BatchProcessorTemplate
+)
+
 __all__ = [
     # Legacy classes
     "CollectionPath",
@@ -116,4 +143,27 @@ __all__ = [
     "DeleteFileResultStrategy",
     "DeleteDirectoryResultStrategy",
     "ResultFileProcessor",
+    
+    # Factory pattern classes
+    "StrategyFactory",
+    "ResultStrategyFactory",
+    "DuplicateHandlerFactory",
+    "ProcessorFactory",
+    "ConfigBasedProcessorFactory",
+    "create_strategy",
+    "create_result_strategy",
+    "create_duplicate_handler",
+    "create_processor",
+    "create_processor_from_config",
+    
+    # Template method pattern classes
+    "FileProcessorTemplate",
+    "FileMoveTemplate",
+    "FileCopyTemplate", 
+    "FileRenameTemplate",
+    "DirectoryProcessorTemplate",
+    "DirectoryCopyTemplate",
+    "DirectoryMoveTemplate",
+    "ArchiveDirectoryTemplate",
+    "BatchProcessorTemplate",
 ]

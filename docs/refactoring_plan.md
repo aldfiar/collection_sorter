@@ -55,16 +55,27 @@ This document outlines a comprehensive plan to refactor the file management comp
 - Provide sensible defaults for backward compatibility
 - Create a simple service locator or factory for complex cases
 
-### 5. Factory Method Pattern for File Handling
+### 5. Factory Method Pattern for File Handling ✅
 
 **Current Issue**: Direct instantiation of file handling classes throughout the code.
 
 **Improvement**: Use factory methods to create appropriate handlers.
 
 **Implementation Steps**:
-- Create factory classes for file processors
-- Update code to use factories instead of direct instantiation
-- Add configuration options to factories
+- Create factory classes for file processors ✅
+- Update code to use factories instead of direct instantiation ✅
+- Add configuration options to factories ✅
+
+**Implemented in**:
+- Added `factories.py` with various factory implementations:
+  - `StrategyFactory` and `ResultStrategyFactory` for creating strategies
+  - `DuplicateHandlerFactory` for creating duplicate handlers
+  - `ProcessorFactory` for creating file processors
+  - `ConfigBasedProcessorFactory` for creating processors from configuration
+- Added utility functions for simplified creation of instances
+- Integrated with the dependency injection system
+- Added CLI example showing how to use factories in commands
+- Added tests in `tests/test_factories.py`
 
 ### 6. Decorator Pattern for Enhanced Functionality
 
@@ -88,16 +99,28 @@ This document outlines a comprehensive plan to refactor the file management comp
 - Implement observer for progress tracking
 - Update UI components to observe file operations
 
-### 8. Template Method Pattern for File Processing
+### 8. Template Method Pattern for File Processing ✅
 
 **Current Issue**: Similar file processing logic duplicated across classes.
 
 **Improvement**: Use template methods to define skeleton algorithms with customizable steps.
 
 **Implementation Steps**:
-- Create abstract base classes with template methods
-- Extract common logic into template methods
-- Implement specific steps in subclasses
+- Create abstract base classes with template methods ✅
+- Extract common logic into template methods ✅
+- Implement specific steps in subclasses ✅
+
+**Implemented in**:
+- Added `templates.py` with various template method implementations:
+  - `FileProcessorTemplate` for file operations with customizable steps
+  - `FileMoveTemplate`, `FileCopyTemplate`, `FileRenameTemplate` for specific file operations
+  - `DirectoryProcessorTemplate` for directory operations with customizable steps
+  - `DirectoryCopyTemplate`, `DirectoryMoveTemplate`, `ArchiveDirectoryTemplate` for specific directory operations
+  - `BatchProcessorTemplate` for processing multiple files/directories at once
+- Each template defines a skeleton algorithm with hook methods
+- Added error handling with Result pattern integration
+- Created examples in `examples/template_pattern_usage.py`
+- Added tests in `tests/test_templates.py`
 
 ### 9. Builder Pattern for Complex File Operations
 
@@ -162,9 +185,9 @@ We'll implement these improvements in the following order, prioritizing the most
 3. Composition Over Inheritance ✅
 4. Strategy Pattern for File Operations ✅
 5. Result/Either Pattern for Error Handling ✅
-6. Factory Method Pattern (Next)
-7. Template Method Pattern
-8. Command Pattern
+6. Factory Method Pattern ✅
+7. Template Method Pattern ✅
+8. Command Pattern (Next)
 9. Builder Pattern
 10. Decorator Pattern
 11. Observer Pattern

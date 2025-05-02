@@ -3,9 +3,18 @@ import shutil
 import tempfile
 from pathlib import Path
 import unittest
+import warnings
 
-from collection_sorter.common.archive import ArchivedCollection
+# DEPRECATED TEST FILE
+# This test file is testing code that was using the deprecated ArchivedCollection class.
+warnings.warn(
+    "test_mass_zip.py tests code that used the deprecated ArchivedCollection class. "
+    "The actual implementation now uses ArchiveDirectoryTemplate from collection_sorter.common.templates.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
+from collection_sorter.common.templates import ArchiveDirectoryTemplate
 from collection_sorter.mass_zip import ZipCollections, zip_collections, parse_args
 
 

@@ -1,10 +1,9 @@
 """Common utilities for collection sorting operations."""
 
-from .archive import ArchivedCollection
 from .files import CollectionPath
 from .move import MovableCollection
 from .rename import linux_rename_function, windows_rename_function
-from .sorter import BaseCollection, MultiThreadTask, SortExecutor
+from .sorter import MultiThreadTask, SortExecutor
 
 # New refactored modules
 from .paths import FilePath, DirectoryPath, PathType
@@ -83,11 +82,9 @@ from .templates import (
 __all__ = [
     # Legacy classes
     "CollectionPath",
-    "ArchivedCollection",
     "MovableCollection",
     "linux_rename_function",
     "windows_rename_function",
-    "BaseCollection",
     "MultiThreadTask",
     "SortExecutor",
     

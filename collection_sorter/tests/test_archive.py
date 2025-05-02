@@ -3,8 +3,22 @@ import tempfile
 import shutil
 from pathlib import Path
 import zipfile
+import warnings
 
-from collection_sorter.common.archive import ArchivedCollection
+# DEPRECATED TEST FILE
+# This test file is for a deprecated module and should be rewritten to use the template-based implementation.
+warnings.warn(
+    "test_archive.py uses the deprecated ArchivedCollection class. "
+    "Use ArchiveDirectoryTemplate from collection_sorter.common.templates instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
+
+# Import using a try-except to prevent errors
+try:
+    from collection_sorter.common.archive import ArchivedCollection
+except ImportError:
+    from collection_sorter.common.templates import ArchiveDirectoryTemplate
 
 class TestArchivedCollection(unittest.TestCase):
     def setUp(self):

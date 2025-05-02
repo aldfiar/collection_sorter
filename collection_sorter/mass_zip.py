@@ -5,7 +5,9 @@ from typing import List, Optional, Sequence
 
 from collection_sorter.common.sorter import MultiThreadTask, SortExecutor
 from collection_sorter.common.config import SortConfig
-from collection_sorter.common.archive import ArchivedCollection
+from collection_sorter.common.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
+from collection_sorter.common.paths import FilePath
+from collection_sorter.common.duplicates import DuplicateHandler
 
 logger = logging.getLogger(__name__)
 
@@ -89,20 +91,39 @@ class ZipCollections(MultiThreadTask):
             super().__init__(config=self._config)
             
         try:
-            collection = ArchivedCollection(source)
+            # Create duplicate handler
+            duplicate_handler = DuplicateHandler(
+                strategy="rename_new", 
+                interactive=False,
+                dry_run=False
+            )
+            
+            # Create the archiver template
+            archiver = ArchiveDirectoryTemplate(
+                dry_run=False,
+                duplicate_handler=duplicate_handler,
+                recursive=True,
+                compression_level=6
+            )
+            
             logger.info(f"Processing collection: {source}")
             
-            # Create archive in destination directory if specified
-            if destination:
-                collection = collection.archive_directory(destination=destination)
+            source_path = FilePath(source)
+            dest_path = FilePath(destination) if destination else source_path.parent
+            
+            # Create archive in destination directory
+            result = archiver.process_directory(
+                source_path, 
+                dest_path,
+                remove_source=self._remove
+            )
+            
+            if result.is_success():
+                logger.info(f"Successfully archived: {source}")
             else:
-                collection = collection.archive_folders(zip_parent=True)
-                
-            if self._remove and source.exists():
-                import shutil
-                shutil.rmtree(source)
-                
-            logger.info(f"Successfully archived: {source}")
+                errors = result.unwrap_error()
+                logger.error(f"Failed to archive {source}: {errors}")
+                raise Exception(f"Failed to archive {source}: {errors}")
         except Exception as e:
             logger.error(f"Failed to process {source}: {str(e)}")
             raise

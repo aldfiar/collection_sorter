@@ -26,7 +26,7 @@ pip install collection-sorter
 curl -sSL https://install.python-poetry.org | python3 -
 
 # Clone the repository
-git clone https://github.com/yourusername/collection-sorter.git
+git clone https://github.com/aldfiar/collection-sorter.git
 cd collection-sorter
 
 # Install with Poetry
@@ -35,6 +35,22 @@ poetry install
 # Activate the virtual environment
 poetry shell
 ```
+
+### Dependencies
+
+Collection Sorter requires Python 3.9 or later and the following dependencies:
+
+- **Core Dependencies**:
+  - pycountry: For language detection and formatting
+  - parse: For pattern-based file name parsing
+  - click: For command-line interface
+  - rich: For colorful terminal output
+  - python-dateutil: For date parsing and manipulation
+  - pyyaml: For configuration file support
+  - pydantic: For configuration validation
+  - tomli: For TOML configuration support
+
+These dependencies are automatically installed when you install the package with pip or poetry.
 
 ## Basic Usage
 
@@ -146,6 +162,40 @@ collection-sorter rename ~/Documents/messy -d ~/Documents/organized --dry-run
 ```bash
 collection-sorter manga ~/Downloads/manga -v
 ```
+
+## Development
+
+### Running Tests
+
+Collection Sorter has a comprehensive test suite. To run tests:
+
+```bash
+# Using unittest
+python -m unittest discover collection_sorter/tests
+
+# Or if you have pytest installed
+pytest
+```
+
+#### Test Requirements
+
+- **Unit Tests**: Most unit tests do not require external dependencies
+- **Integration Tests**: Full integration tests require all dependencies to be installed
+- **Basic Integration Tests**: Basic CLI tests will run without external dependencies
+
+If you're running tests without all dependencies installed, you'll see some tests skipped with messages indicating which dependencies are missing.
+
+### Contributing
+
+Contributions are welcome! Here's how you can contribute:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-new-feature`
+3. Make your changes and add tests
+4. Ensure all tests pass: `python -m unittest discover`
+5. Commit your changes: `git commit -am 'Add my new feature'`
+6. Push to the branch: `git push origin feature/my-new-feature`
+7. Submit a pull request
 
 ## License
 

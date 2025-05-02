@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple, Dict, Any
+from typing import List, Optional, Dict, Any
 
 import click
 from rich.console import Console
@@ -9,8 +9,6 @@ from rich.console import Console
 from collection_sorter.common.exceptions import CollectionSorterError, ConfigurationError
 from collection_sorter.common.logging import setup_logging, log_exception, console
 from collection_sorter.common.config_manager import config_manager
-from collection_sorter.manga.manga_sorter import MangaCollection
-from collection_sorter.common.archive import ArchivedCollection
 
 def print_version(ctx, param, value):
     """Print the version and exit"""
@@ -158,8 +156,7 @@ def generate_config(format, output):
 @add_options(common_options)
 @add_options(collection_options)
 @click.pass_context
-def manga(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run,
-          destination, archive, move):
+def manga(ctx, **kwargs):
     """
     Sort manga collections.
     
@@ -167,51 +164,9 @@ def manga(ctx, sources, config, verbose, log_file, log_level, interactive, dry_r
     
     SOURCES: One or more source directories to process.
     """
-    try:
-        # Apply Click context to configuration manager
-        config_manager.apply_click_context(ctx)
-        
-        # Get command-specific configuration
-        cmd_config = config_manager.get_command_config("manga")
-        
-        # Setup logging using configuration
-        logging_config = config_manager.config.logging
-        setup_logging(
-            log_file=logging_config.log_file, 
-            log_level=logging_config.log_level, 
-            verbose=logging_config.verbose
-        )
-        
-        # Process manga collections
-        for source in sources:
-            manga = MangaCollection(
-                source=source,
-                destination=cmd_config.get("destination"),
-                archive=cmd_config.get("archive", False),
-                move=cmd_config.get("move", False),
-                dry_run=cmd_config.get("dry_run", False),
-                interactive=config_manager.config.ui.interactive,
-                verbose=logging_config.verbose,
-                author_folders=config_manager.config.manga.author_folders
-            )
-            result = manga.process_single_source(source)
-            
-            if result.get("success", False):
-                console.print(f"[green]Successfully processed {source}[/green]")
-            else:
-                error = result.get("error", "Unknown error")
-                console.print(f"[red]Error processing {source}: {error}[/red]")
-                
-    except ConfigurationError as e:
-        console.print(f"[red]Configuration error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except CollectionSorterError as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except Exception as e:
-        log_exception(e)
-        console.print(f"[red]Unexpected error: {str(e)}[/red]")
-        sys.exit(1)
+    # Use pattern-based implementation
+    from collection_sorter.cli_patterns import handle_manga_command
+    handle_manga_command(ctx)
 
 @cli.command()
 @click.argument(
@@ -223,8 +178,7 @@ def manga(ctx, sources, config, verbose, log_file, log_level, interactive, dry_r
 @add_options(common_options)
 @add_options(collection_options)
 @click.pass_context
-def rename(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run,
-          destination, archive, move):
+def rename(ctx, **kwargs):
     """
     Batch rename files.
     
@@ -232,55 +186,9 @@ def rename(ctx, sources, config, verbose, log_file, log_level, interactive, dry_
     
     SOURCES: One or more source directories or files to process.
     """
-    try:
-        # Apply Click context to configuration manager
-        config_manager.apply_click_context(ctx)
-        
-        # Get command-specific configuration
-        cmd_config = config_manager.get_command_config("rename")
-        
-        # Setup logging using configuration
-        logging_config = config_manager.config.logging
-        setup_logging(
-            log_file=logging_config.log_file, 
-            log_level=logging_config.log_level, 
-            verbose=logging_config.verbose
-        )
-        
-        # Import here to avoid circular imports
-        from collection_sorter.mass_rename import RenameCollection
-        
-        # Process each source
-        for source in sources:
-            rename_processor = RenameCollection(
-                source=source,
-                destination=cmd_config.get("destination"),
-                archive=cmd_config.get("archive", False),
-                move=cmd_config.get("move", False),
-                dry_run=cmd_config.get("dry_run", False),
-                interactive=config_manager.config.ui.interactive,
-                verbose=logging_config.verbose,
-                recursive=config_manager.config.rename.recursive,
-                patterns=config_manager.config.rename.patterns
-            )
-            result = rename_processor.process_single_source(source)
-            
-            if result.get("success", False):
-                console.print(f"[green]Successfully renamed {source}[/green]")
-            else:
-                error = result.get("error", "Unknown error")
-                console.print(f"[red]Error renaming {source}: {error}[/red]")
-                
-    except ConfigurationError as e:
-        console.print(f"[red]Configuration error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except CollectionSorterError as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except Exception as e:
-        log_exception(e)
-        console.print(f"[red]Unexpected error: {str(e)}[/red]")
-        sys.exit(1)
+    # Use pattern-based implementation
+    from collection_sorter.cli_patterns import handle_rename_command
+    handle_rename_command(ctx)
 
 @cli.command()
 @click.argument(
@@ -292,8 +200,7 @@ def rename(ctx, sources, config, verbose, log_file, log_level, interactive, dry_
 @add_options(common_options)
 @add_options(collection_options)
 @click.pass_context
-def zip(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run,
-        destination, archive, move, duplicate_strategy, duplicates_dir):
+def zip(ctx, **kwargs):
     """
     Create archives from collections.
     
@@ -301,74 +208,9 @@ def zip(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run
     
     SOURCES: One or more source directories to archive.
     """
-    try:
-        # Apply Click context to configuration manager
-        config_manager.apply_click_context(ctx)
-        
-        # Get command-specific configuration
-        cmd_config = config_manager.get_command_config("zip")
-        
-        # Setup logging using configuration
-        logging_config = config_manager.config.logging
-        setup_logging(
-            log_file=logging_config.log_file, 
-            log_level=logging_config.log_level, 
-            verbose=logging_config.verbose
-        )
-        
-        # Create duplicate handler from configuration
-        from collection_sorter.common.duplicates import DuplicateHandler
-        
-        # Use command-line arguments if provided, otherwise use config values
-        dup_strategy = duplicate_strategy or config_manager.config.collection.duplicate_strategy
-        dup_dir = duplicates_dir or config_manager.config.collection.duplicates_dir
-        
-        duplicate_handler = DuplicateHandler(
-            strategy=dup_strategy,
-            duplicates_dir=dup_dir,
-            interactive=interactive or config_manager.config.ui.interactive,
-            dry_run=dry_run or cmd_config.get("dry_run", False)
-        )
-        
-        # Process each source
-        for source in sources:
-            zip_processor = ArchivedCollection(
-                path=source,
-                destination=cmd_config.get("destination"),
-                move_source=cmd_config.get("move", False),
-                dry_run=cmd_config.get("dry_run", False),
-                interactive=config_manager.config.ui.interactive,
-                verbose=logging_config.verbose,
-                compression_level=config_manager.config.zip.compression_level,
-                duplicate_handler=duplicate_handler
-            )
-            
-            if Path(source).is_dir():
-                # Use nested setting from zip config if available
-                nested = archive if archive is not None else config_manager.config.zip.nested
-                
-                if nested:  # Nested archiving
-                    result = zip_processor.archive_folders()
-                else:
-                    result = zip_processor.archive_directory()
-                
-                if result:
-                    console.print(f"[green]Successfully archived {source}[/green]")
-                else:
-                    console.print(f"[red]Error archiving {source}[/red]")
-            else:
-                console.print(f"[yellow]Skipping file {source} - only directories can be archived[/yellow]")
-                
-    except ConfigurationError as e:
-        console.print(f"[red]Configuration error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except CollectionSorterError as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except Exception as e:
-        log_exception(e)
-        console.print(f"[red]Unexpected error: {str(e)}[/red]")
-        sys.exit(1)
+    # Use pattern-based implementation
+    from collection_sorter.cli_patterns import handle_zip_command
+    handle_zip_command(ctx)
 
 @cli.command()
 @click.argument(
@@ -384,8 +226,7 @@ def zip(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run
     type=click.Path(file_okay=False)
 )
 @click.pass_context
-def video(ctx, sources, config, verbose, log_file, log_level, interactive, dry_run,
-         destination):
+def video(ctx, **kwargs):
     """
     Rename video files.
     
@@ -393,53 +234,9 @@ def video(ctx, sources, config, verbose, log_file, log_level, interactive, dry_r
     
     SOURCES: One or more source directories or files to process.
     """
-    try:
-        # Apply Click context to configuration manager
-        config_manager.apply_click_context(ctx)
-        
-        # Get command-specific configuration
-        cmd_config = config_manager.get_command_config("video")
-        
-        # Setup logging using configuration
-        logging_config = config_manager.config.logging
-        setup_logging(
-            log_file=logging_config.log_file, 
-            log_level=logging_config.log_level, 
-            verbose=logging_config.verbose
-        )
-        
-        # Import here to avoid circular imports
-        from collection_sorter.video_rename import VideoCollection
-        
-        # Process each source
-        for source in sources:
-            video_processor = VideoCollection(
-                source=source,
-                destination=cmd_config.get("destination"),
-                dry_run=cmd_config.get("dry_run", False),
-                interactive=config_manager.config.ui.interactive,
-                verbose=logging_config.verbose,
-                video_extensions=config_manager.config.video.video_extensions,
-                subtitle_extensions=config_manager.config.video.subtitle_extensions
-            )
-            result = video_processor.process_single_source(source)
-            
-            if result.get("success", False):
-                console.print(f"[green]Successfully processed video files in {source}[/green]")
-            else:
-                error = result.get("error", "Unknown error")
-                console.print(f"[red]Error processing {source}: {error}[/red]")
-                
-    except ConfigurationError as e:
-        console.print(f"[red]Configuration error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except CollectionSorterError as e:
-        console.print(f"[red]Error: {str(e)}[/red]")
-        sys.exit(e.exit_code)
-    except Exception as e:
-        log_exception(e)
-        console.print(f"[red]Unexpected error: {str(e)}[/red]")
-        sys.exit(1)
+    # Use pattern-based implementation
+    from collection_sorter.cli_patterns import handle_video_command
+    handle_video_command(ctx)
 
 def main():
     """Entry point for the application"""

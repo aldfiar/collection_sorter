@@ -48,19 +48,24 @@ from .result_strategies import (
 )
 from .result_processor import ResultFileProcessor
 
-# Factory pattern modules
-from .factories import (
-    StrategyFactory,
-    ResultStrategyFactory,
-    DuplicateHandlerFactory,
-    ProcessorFactory,
-    ConfigBasedProcessorFactory,
-    create_strategy,
-    create_result_strategy,
-    create_duplicate_handler,
-    create_processor,
-    create_processor_from_config
-)
+# Comment out the automatic import of factory modules to avoid circular imports
+# and issues with Generic type registration - these will be imported as needed
+# Users of the library should import specific factories directly from .factories
+# when they need them.
+
+# Define factory names for __all__ but don't import them automatically
+_factory_names = [
+    "StrategyFactory",
+    "ResultStrategyFactory",
+    "DuplicateHandlerFactory",
+    "ProcessorFactory",
+    "ConfigBasedProcessorFactory",
+    "create_strategy",
+    "create_result_strategy",
+    "create_duplicate_handler",
+    "create_processor",
+    "create_processor_from_config"
+]
 
 # Template method pattern modules
 from .templates import (
@@ -144,17 +149,8 @@ __all__ = [
     "DeleteDirectoryResultStrategy",
     "ResultFileProcessor",
     
-    # Factory pattern classes
-    "StrategyFactory",
-    "ResultStrategyFactory",
-    "DuplicateHandlerFactory",
-    "ProcessorFactory",
-    "ConfigBasedProcessorFactory",
-    "create_strategy",
-    "create_result_strategy",
-    "create_duplicate_handler",
-    "create_processor",
-    "create_processor_from_config",
+    # Factory pattern classes - imported only as needed
+    *_factory_names,
     
     # Template method pattern classes
     "FileProcessorTemplate",

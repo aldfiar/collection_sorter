@@ -1,7 +1,7 @@
 import os
 import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 import logging
 
 from collection_sorter.common.exceptions import ConfigurationError
@@ -24,6 +24,33 @@ DEFAULT_CONFIG = {
     "log_file": None,
     "log_level": "INFO",
 }
+
+# Legacy configuration class for backward compatibility
+class SortConfig:
+    """
+    Legacy configuration class for sorting operations.
+    
+    This class is kept for backward compatibility with existing code.
+    New code should use the Config class instead.
+    """
+    
+    def __init__(
+        self,
+        destination: Optional[Union[str, Path]] = None,
+        archive: bool = False,
+        move: bool = False
+    ):
+        """
+        Initialize sort configuration.
+        
+        Args:
+            destination: Optional destination path
+            archive: Whether to create archives
+            move: Whether to move files (removing source after processing)
+        """
+        self.destination = Path(destination) if destination else None
+        self.archive = archive
+        self.move = move
 
 class Config:
     """

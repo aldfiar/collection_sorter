@@ -8,7 +8,7 @@ file processors, strategies, and handlers based on configuration.
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Type, TypeVar, Union, Any
+from typing import Dict, List, Optional, Type, TypeVar, Union, Any, Generic, Callable, Set
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
 from collection_sorter.common.paths import FilePath
@@ -365,6 +365,161 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
             default_dry_run=default_dry_run,
             default_compression_level=default_compression_level,
             default_duplicate_strategy=default_duplicate_strategy
+        )
+        
+    def create_manga_processor(
+        self,
+        source_path: Union[str, Path, FilePath],
+        destination_path: Union[str, Path, FilePath],
+        template_func: Optional[Callable[[Dict[str, Any], Optional[Callable]], str]] = None,
+        author_folders: bool = False,
+        archive: bool = False,
+        move_source: bool = False,
+        dry_run: Optional[bool] = None,
+        interactive: Optional[bool] = None,
+        **kwargs
+    ):
+        """
+        Create a manga processor for organizing manga collections.
+        
+        Args:
+            source_path: Source path to process
+            destination_path: Destination path
+            template_func: Function to format manga info into a filename
+            author_folders: Whether to organize by author folders
+            archive: Whether to create archives
+            move_source: Whether to remove source files after processing
+            dry_run: Whether to simulate operations
+            interactive: Whether to prompt for confirmation
+            **kwargs: Additional processor-specific arguments
+            
+        Returns:
+            Configured MangaProcessorTemplate
+        """
+        from collection_sorter.common.templates_extensions import MangaProcessorTemplate
+        
+        # Use provided values or get from config
+        dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
+        interactive = interactive if interactive is not None else self._get_config_value("interactive", False)
+        
+        # Create duplicate handler
+        duplicate_handler = self.duplicate_handler_factory.create(
+            strategy=self._get_config_value("duplicate_strategy", self.default_duplicate_strategy),
+            duplicates_dir=self._get_config_value("duplicates_dir", None),
+            interactive=interactive,
+            dry_run=dry_run
+        )
+        
+        # Create and return manga processor
+        return MangaProcessorTemplate(
+            source_path=source_path,
+            destination_path=destination_path,
+            template_func=template_func,
+            author_folders=author_folders,
+            archive=archive,
+            move_source=move_source,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_handler=duplicate_handler
+        )
+        
+    def create_file_processor(
+        self,
+        source_path: Union[str, Path, FilePath],
+        destination_path: Optional[Union[str, Path, FilePath]] = None,
+        dry_run: Optional[bool] = None,
+        interactive: Optional[bool] = None,
+        **kwargs
+    ):
+        """
+        Create a file processor for handling file operations.
+        
+        Args:
+            source_path: Source path to process
+            destination_path: Optional destination path
+            dry_run: Whether to simulate operations
+            interactive: Whether to prompt for confirmation
+            **kwargs: Additional processor-specific arguments
+            
+        Returns:
+            Configured ResultFileProcessor or similar
+        """
+        from collection_sorter.common.result_processor import ResultFileProcessor
+        
+        # Use provided values or get from config
+        dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
+        interactive = interactive if interactive is not None else self._get_config_value("interactive", False)
+        
+        # Create duplicate handler
+        duplicate_handler = self.duplicate_handler_factory.create(
+            strategy=self._get_config_value("duplicate_strategy", self.default_duplicate_strategy),
+            duplicates_dir=self._get_config_value("duplicates_dir", None),
+            interactive=interactive,
+            dry_run=dry_run
+        )
+        
+        # Create and return file processor
+        return ResultFileProcessor(
+            dry_run=dry_run,
+            compression_level=self._get_config_value("compression_level", self.default_compression_level),
+            duplicate_handler=duplicate_handler
+        )
+        
+    def create_video_processor(
+        self,
+        source_path: Union[str, Path, FilePath],
+        destination_path: Optional[Union[str, Path, FilePath]] = None,
+        video_extensions: Optional[Set[str]] = None, 
+        subtitle_extensions: Optional[Set[str]] = None,
+        dry_run: Optional[bool] = None,
+        interactive: Optional[bool] = None,
+        **kwargs
+    ):
+        """
+        Create a video processor for organizing and renaming video files.
+        
+        Args:
+            source_path: Source path to process
+            destination_path: Optional destination path
+            video_extensions: Set of video file extensions
+            subtitle_extensions: Set of subtitle file extensions
+            dry_run: Whether to simulate operations
+            interactive: Whether to prompt for confirmation
+            **kwargs: Additional processor-specific arguments
+            
+        Returns:
+            Configured VideoProcessorTemplate
+        """
+        from collection_sorter.common.templates_extensions import VideoProcessorTemplate
+        
+        # Use provided values or get from config
+        dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
+        interactive = interactive if interactive is not None else self._get_config_value("interactive", False)
+        
+        # Create duplicate handler
+        duplicate_handler = self.duplicate_handler_factory.create(
+            strategy=self._get_config_value("duplicate_strategy", self.default_duplicate_strategy),
+            duplicates_dir=self._get_config_value("duplicates_dir", None),
+            interactive=interactive,
+            dry_run=dry_run
+        )
+        
+        # Get default extensions from config if not provided
+        if video_extensions is None:
+            video_extensions = set(self._get_config_value("video.video_extensions", ['.mp4', '.mkv', '.avi', '.mov']))
+            
+        if subtitle_extensions is None:
+            subtitle_extensions = set(self._get_config_value("video.subtitle_extensions", ['.srt', '.sub', '.idx', '.ass']))
+        
+        # Create and return video processor
+        return VideoProcessorTemplate(
+            source_path=source_path,
+            destination_path=destination_path,
+            video_extensions=video_extensions,
+            subtitle_extensions=subtitle_extensions,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_handler=duplicate_handler
         )
     
     def _get_config_value(self, key: str, default: Any) -> Any:

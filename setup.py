@@ -30,7 +30,9 @@ setup(
         "python-dateutil>=2.9.0",
         "rich>=13.7.0",
         "tqdm>=4.66.1",
-        "pyyaml>=6.0.1"
+        "pyyaml>=6.0.1",
+        "pydantic>=2.6.1",
+        "tomli>=2.0.1"
     ],
     entry_points={
         'console_scripts': [

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "collection_sorter"
-version = "0.1.0"
+version = "0.1.1"
 description = "A command-line tool for organizing and processing various file collections"
 authors = ["Ivan Shchekoldin <darthmantis@yandex.ru>"]
 license = "Apache-2.0"
@@ -28,6 +28,9 @@ pycountry = "^23.12.11"
 parse = "^1.20.1"
 click = "^8.1.7"
 python-dateutil = "^2.9.0"
+rich = "^13.7.0"
+tqdm = "^4.66.1"
+pyyaml = "^6.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -39,10 +42,6 @@ mypy = "^1.8.0"
 
 [tool.poetry.scripts]
 collection-sorter = "collection_sorter.cli:main"
-manga-sort = "collection_sorter.manga_sort:manga_sort"
-mass-rename = "collection_sorter.mass_rename:rename_files"
-mass-zip = "collection_sorter.mass_zip:zip_collections"
-video-rename = "collection_sorter.video_rename:rename_sort"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

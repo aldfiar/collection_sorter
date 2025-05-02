@@ -1,19 +1,30 @@
+"""
+Compatibility layer for configuration.
+
+This module provides backward compatibility with the old configuration system
+while forwarding to the new centralized configuration manager.
+"""
+
 import os
-import yaml
+import sys
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
-import logging
 
+# Import from exceptions first to avoid circular imports
 from collection_sorter.common.exceptions import ConfigurationError
 
+# Initialize logger
 logger = logging.getLogger("config")
 
+# Legacy configuration paths - kept for reference
 DEFAULT_CONFIG_PATHS = [
     Path("~/.config/collection_sorter/config.yaml").expanduser(),
     Path("~/.collection_sorter.yaml").expanduser(),
     Path(os.getcwd()) / "collection_sorter.yaml",
 ]
 
+# Legacy default configuration - kept for reference
 DEFAULT_CONFIG = {
     "destination": None,
     "archive": False,
@@ -25,13 +36,12 @@ DEFAULT_CONFIG = {
     "log_level": "INFO",
 }
 
-# Legacy configuration class for backward compatibility
 class SortConfig:
     """
     Legacy configuration class for sorting operations.
     
     This class is kept for backward compatibility with existing code.
-    New code should use the Config class instead.
+    New code should use the ConfigManager.config property instead.
     """
     
     def __init__(
@@ -54,7 +64,10 @@ class SortConfig:
 
 class Config:
     """
-    Configuration manager for collection sorter.
+    Legacy configuration manager for collection sorter.
+    
+    This class is kept for backward compatibility with existing code.
+    New code should use the ConfigManager class instead.
     
     Loads configuration from multiple sources with precedence:
     1. Command line arguments (highest priority)
@@ -71,17 +84,42 @@ class Config:
             config_path: Optional path to config file. If not provided,
                          default locations will be checked.
         """
+        # Initialize with default values
         self.config = DEFAULT_CONFIG.copy()
         
-        # Load from config file
-        self._load_from_file(config_path)
-        
-        # Load from environment variables
-        self._load_from_env()
+        # Forward to new config manager if it's available
+        try:
+            from collection_sorter.common.config_manager import config_manager
+            config_manager.load_configuration(config_path=config_path)
+            
+            # Map new config structure to old flat dictionary
+            collection_config = config_manager.config.collection
+            logging_config = config_manager.config.logging
+            ui_config = config_manager.config.ui
+            
+            # Update self.config with values from new config
+            self.config.update({
+                "destination": collection_config.destination,
+                "archive": collection_config.archive,
+                "move": collection_config.move,
+                "dry_run": collection_config.dry_run,
+                "interactive": ui_config.interactive,
+                "verbose": logging_config.verbose,
+                "log_file": logging_config.log_file,
+                "log_level": logging_config.log_level,
+            })
+            
+        except (ImportError, AttributeError):
+            # Fall back to old implementation if new config manager isn't available
+            # Load from config file
+            self._load_from_file(config_path)
+            
+            # Load from environment variables
+            self._load_from_env()
     
     def _load_from_file(self, config_path: Optional[str] = None) -> None:
         """
-        Load configuration from YAML file.
+        Legacy method to load configuration from YAML file.
         
         Args:
             config_path: Optional specific config file path
@@ -89,6 +127,17 @@ class Config:
         Raises:
             ConfigurationError: If config file format is invalid
         """
+        # Forward to new config manager if it's available
+        try:
+            from collection_sorter.common.config_manager import config_manager
+            config_manager.load_configuration(config_path=config_path)
+            return
+        except (ImportError, AttributeError):
+            logger.warning("New config manager not available, using legacy implementation")
+        
+        # Legacy implementation below
+        import yaml
+        
         # Check specified config path first
         if config_path:
             path = Path(config_path).expanduser()
@@ -125,11 +174,20 @@ class Config:
     
     def _load_from_env(self) -> None:
         """
-        Load configuration from environment variables.
+        Legacy method to load configuration from environment variables.
         
         Environment variables should be prefixed with COLLECTION_SORTER_
         (e.g., COLLECTION_SORTER_DESTINATION)
         """
+        # Forward to new config manager if it's available
+        try:
+            from collection_sorter.common.config_manager import config_manager
+            config_manager.load_configuration()
+            return
+        except (ImportError, AttributeError):
+            logger.warning("New config manager not available, using legacy implementation")
+        
+        # Legacy implementation below
         env_prefix = "COLLECTION_SORTER_"
         
         for key in self.config.keys():
@@ -155,6 +213,32 @@ class Config:
         Args:
             args: Dictionary of command line arguments
         """
+        # Forward to new config manager if it's available
+        try:
+            from collection_sorter.common.config_manager import config_manager
+            config_manager.load_configuration(cli_args=args)
+            
+            # Update self.config with values from new config
+            collection_config = config_manager.config.collection
+            logging_config = config_manager.config.logging
+            ui_config = config_manager.config.ui
+            
+            self.config.update({
+                "destination": collection_config.destination,
+                "archive": collection_config.archive,
+                "move": collection_config.move,
+                "dry_run": collection_config.dry_run,
+                "interactive": ui_config.interactive,
+                "verbose": logging_config.verbose,
+                "log_file": logging_config.log_file,
+                "log_level": logging_config.log_level,
+            })
+            
+            return
+        except (ImportError, AttributeError):
+            logger.warning("New config manager not available, using legacy implementation")
+        
+        # Legacy implementation below
         for key, value in args.items():
             if key in self.config and value is not None:
                 self.config[key] = value

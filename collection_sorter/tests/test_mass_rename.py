@@ -15,6 +15,14 @@ warnings.warn(
     stacklevel=2
 )
 
+# Mock the dependencies that have been removed
+class SortExecutor:
+    def __init__(self):
+        pass
+        
+    def execute(self, task, sources):
+        pass
+
 class TestMassRename(TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()

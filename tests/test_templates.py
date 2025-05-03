@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.result import Result, OperationError, ErrorType
+from collection_sorter.result import Result, OperationError, ErrorType
 from collection_sorter.templates.templates import (
     FileProcessorTemplate,
     FileMoveTemplate,

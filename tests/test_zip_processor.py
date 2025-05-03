@@ -6,7 +6,7 @@ from pathlib import Path
 
 from collection_sorter.cli_handlers.zip_handler import ZipCommandHandler
 from collection_sorter.files.duplicates import DuplicateHandler
-from collection_sorter.common.paths import FilePath
+from collection_sorter.files import FilePath
 from collection_sorter.templates.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
 
 

@@ -11,7 +11,7 @@ from rich.progress import (
 )
 from tqdm import tqdm
 
-from collection_sorter.logging import console
+from collection_sorter.project_logging import console
 
 # Type variable for generic iterables
 T = TypeVar('T')

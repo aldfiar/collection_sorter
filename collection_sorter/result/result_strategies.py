@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 from collection_sorter.files.duplicates import DuplicateHandler
-from collection_sorter.files.operations import (
+from collection_sorter.operations import (
     move_file, copy_file, rename_file, archive_directory, extract_archive,
     delete_file, delete_directory
 )

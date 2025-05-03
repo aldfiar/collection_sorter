@@ -16,7 +16,7 @@ from rich.prompt import Prompt
 
 from collection_sorter.config.config_models import AppConfig
 from collection_sorter.common.exceptions import FileOperationError, UserInterruptError
-from collection_sorter.logging import console
+from collection_sorter.project_logging import console
 
 logger = logging.getLogger("duplicates")
 

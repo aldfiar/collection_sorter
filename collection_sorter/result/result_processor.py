@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Union, Callable
 
 from collection_sorter.files.duplicates import DuplicateHandler
-from collection_sorter.files.operations import (
+from collection_sorter.operations import (
     check_path_exists, ensure_directory, list_files, list_directories,
     move_and_rename, archive_and_delete
 )

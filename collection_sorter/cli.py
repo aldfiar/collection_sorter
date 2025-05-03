@@ -3,7 +3,7 @@ from pathlib import Path
 
 import click
 
-from collection_sorter.logging import log_exception, console
+from collection_sorter.project_logging import log_exception, console
 from collection_sorter.config.config_manager import config_manager
 
 

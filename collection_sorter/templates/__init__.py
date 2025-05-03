@@ -1,5 +1,13 @@
-from .templates import BatchProcessorTemplate, ArchiveDirectoryTemplate, DirectoryCopyTemplate, \
-    DirectoryProcessorTemplate, DirectoryMoveTemplate, FileCopyTemplate, FileMoveTemplate, FileProcessorTemplate
-
+from .templates  import (
+    FileProcessorTemplate,
+    FileMoveTemplate,
+    FileCopyTemplate,
+    FileRenameTemplate,
+    DirectoryProcessorTemplate,
+    DirectoryCopyTemplate,
+    DirectoryMoveTemplate,
+    ArchiveDirectoryTemplate,
+    BatchProcessorTemplate
+)
 from .templates_extensions import MangaProcessorTemplate, VideoProcessorTemplate, BatchProcessorTemplate, \
     RenameProcessorTemplate

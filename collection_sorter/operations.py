@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
-from .paths import FilePath, PathType
+from collection_sorter.files.paths import FilePath, PathType
 from collection_sorter.result import (
     Result, OperationError, ErrorType, PathResult, result_handler
 )

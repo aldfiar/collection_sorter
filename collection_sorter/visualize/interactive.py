@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 from rich.prompt import Prompt, Confirm
 
 from collection_sorter.common.exceptions import UserInterruptError
-from collection_sorter.logging import console
+from collection_sorter.project_logging import console
 
 
 def confirm_action(

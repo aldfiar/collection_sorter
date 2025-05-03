@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from collection_sorter.files.operations import (
+from collection_sorter.operations import (
     check_path_exists, ensure_directory, list_files, move_file, copy_file, rename_file, archive_directory,
     extract_archive,
     delete_file, delete_directory

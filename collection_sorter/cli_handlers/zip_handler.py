@@ -16,9 +16,9 @@ from collection_sorter.common.factories import (
     create_duplicate_handler,
     ConfigBasedProcessorFactory
 )
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result import Result, OperationError, ErrorType
-from collection_sorter.common.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
+from collection_sorter.files import FilePath
+from collection_sorter.result import Result, OperationError, ErrorType
+from collection_sorter.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
 
 logger = logging.getLogger("zip_handler")
 console = Console()

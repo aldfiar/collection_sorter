@@ -13,8 +13,8 @@ import click
 from rich.console import Console
 
 from collection_sorter.common.factories import create_duplicate_handler
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result import Result, OperationError, ErrorType
+from collection_sorter.files import FilePath
+from collection_sorter.result import Result, OperationError, ErrorType
 
 logger = logging.getLogger("base_handler")
 console = Console()

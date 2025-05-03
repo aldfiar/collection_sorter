@@ -6,8 +6,8 @@ from rich.console import Console
 
 from collection_sorter.config.config_manager import config_manager
 from collection_sorter.common.factories import ConfigBasedProcessorFactory
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result import Result, OperationError
+from collection_sorter.files import FilePath
+from collection_sorter.result import Result, OperationError
 from collection_sorter.templates.templates_extensions import RenameProcessorTemplate
 from .base_handler import TemplateMethodCommandHandler, FactoryBasedCommandHandler
 

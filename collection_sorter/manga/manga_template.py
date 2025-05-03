@@ -1,6 +1,8 @@
-from typing import Any, Dict, Optional, Callable
-import pycountry
 from functools import lru_cache
+from typing import Any, Dict, Optional, Callable
+
+import pycountry
+
 
 @lru_cache(maxsize=1)
 def _get_languages():

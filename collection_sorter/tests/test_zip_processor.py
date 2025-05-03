@@ -1,13 +1,14 @@
 import os
 import shutil
 import tempfile
-from pathlib import Path
 import unittest
+from pathlib import Path
 
-from collection_sorter.common.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.duplicates import DuplicateHandler
 from collection_sorter.cli_handlers.zip_handler import ZipCommandHandler
+from collection_sorter.common.duplicates import DuplicateHandler
+from collection_sorter.common.paths import FilePath
+from collection_sorter.common.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
+
 
 class TestZipProcessor(unittest.TestCase):
     def setUp(self):

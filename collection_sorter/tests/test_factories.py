@@ -4,30 +4,8 @@ Tests for the Factory pattern implementation.
 
 import unittest
 from pathlib import Path
-from typing import Optional, Union
 
-from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.file_processor import FileProcessor
-from collection_sorter.common.result_processor import ResultFileProcessor
-from collection_sorter.common.strategies import (
-    FileOperationStrategy,
-    MoveFileStrategy,
-    CopyFileStrategy,
-    ArchiveStrategy,
-    ExtractArchiveStrategy,
-    RenameFileStrategy
-)
-from collection_sorter.common.result_strategies import (
-    ResultFileOperationStrategy,
-    MoveFileResultStrategy,
-    CopyFileResultStrategy,
-    ArchiveResultStrategy,
-    ExtractArchiveResultStrategy,
-    RenameFileResultStrategy,
-    DeleteFileResultStrategy,
-    DeleteDirectoryResultStrategy
-)
+from collection_sorter.common.duplicates import DuplicateStrategy
 from collection_sorter.common.factories import (
     StrategyFactory,
     ResultStrategyFactory,
@@ -39,6 +17,19 @@ from collection_sorter.common.factories import (
     create_duplicate_handler,
     create_processor,
     create_processor_from_config
+)
+from collection_sorter.common.file_processor import FileProcessor
+from collection_sorter.common.result_processor import ResultFileProcessor
+from collection_sorter.common.result_strategies import (
+    MoveFileResultStrategy,
+    CopyFileResultStrategy,
+    RenameFileResultStrategy,
+    DeleteFileResultStrategy
+)
+from collection_sorter.common.strategies import (
+    MoveFileStrategy,
+    CopyFileStrategy,
+    ArchiveStrategy
 )
 
 

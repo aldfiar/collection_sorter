@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from rich.console import Console
 from rich.prompt import Prompt, Confirm
 
-from collection_sorter.common.logging import console
 from collection_sorter.common.exceptions import UserInterruptError
+from collection_sorter.common.logging import console
+
 
 def confirm_action(
     message: str, 

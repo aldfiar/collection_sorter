@@ -7,19 +7,13 @@ to perform different file operations with consistent interface and error handlin
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union, Any, Callable
+from typing import List, Optional, Union, Any, Callable
 
 from collection_sorter.common.duplicates import DuplicateHandler
-from collection_sorter.common.exceptions import FileOperationError
 from collection_sorter.common.paths import FilePath, DirectoryPath
 from collection_sorter.common.strategies import (
-    FileOperationStrategy, 
+    FileOperationStrategy,
     FileOperationContext,
-    MoveFileStrategy,
-    CopyFileStrategy,
-    ArchiveStrategy,
-    ExtractArchiveStrategy,
-    RenameFileStrategy,
     create_default_strategies
 )
 

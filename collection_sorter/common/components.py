@@ -6,15 +6,13 @@ using composition instead of inheritance for better flexibility.
 """
 
 import logging
-import shutil
-import uuid
 import zipfile
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Callable, List, Optional, Union
 
 from collection_sorter.common.exceptions import FileOperationError
-from collection_sorter.common.paths import FilePath, DirectoryPath, PathType
+from collection_sorter.common.paths import FilePath, PathType
 
 logger = logging.getLogger("components")
 

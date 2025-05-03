@@ -1,11 +1,11 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import Callable, Optional, Dict, List, Set, Union
+from typing import Callable, Optional, Union
 
-from .files import CollectionPath
 from .duplicates import DuplicateHandler, DuplicateStrategy
-from .exceptions import FileOperationError, UserInterruptError
+from .exceptions import FileOperationError
+from .files import CollectionPath
 
 logger = logging.getLogger("move")
 

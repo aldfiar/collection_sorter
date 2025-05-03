@@ -5,13 +5,13 @@ This module provides value objects for working with file paths consistently
 throughout the application, with proper validation and error handling.
 """
 
-import os
 import shutil
 from enum import Enum, auto
 from pathlib import Path
-from typing import List, Optional, Set, Union, Iterator, Callable
+from typing import List, Union
 
 from collection_sorter.common.exceptions import FileOperationError
+
 
 class PathType(Enum):
     """Types of paths that can be handled."""

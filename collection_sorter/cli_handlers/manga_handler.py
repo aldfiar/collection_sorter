@@ -1,16 +1,15 @@
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 
 import click
 from rich.console import Console
 
+from collection_sorter.common.config_manager import config_manager
+from collection_sorter.common.factories import ConfigBasedProcessorFactory
 from collection_sorter.common.paths import FilePath
 from collection_sorter.common.result import Result, OperationError
-from collection_sorter.common.factories import ConfigBasedProcessorFactory
 from collection_sorter.common.templates_extensions import MangaProcessorTemplate
-from collection_sorter.common.config_manager import config_manager
 from collection_sorter.manga.manga_template import manga_template_function
-
 from .base_handler import TemplateMethodCommandHandler, FactoryBasedCommandHandler
 
 console = Console()

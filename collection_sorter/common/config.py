@@ -5,9 +5,8 @@ This module provides backward compatibility with the old configuration system
 while forwarding to the new centralized configuration manager.
 """
 
-import os
-import sys
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Any, Optional, Union
 

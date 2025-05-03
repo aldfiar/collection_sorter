@@ -10,9 +10,8 @@ import logging
 import uuid
 from enum import Enum
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
-from rich.console import Console
 from rich.prompt import Prompt
 
 from collection_sorter.common.config_models import AppConfig

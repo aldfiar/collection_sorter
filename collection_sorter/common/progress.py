@@ -1,16 +1,14 @@
-import time
-from typing import Any, Callable, Dict, List, Optional, Iterable, TypeVar, Union
 from contextlib import contextmanager
+from typing import Optional, Iterable, TypeVar
 
 from rich.progress import (
-    Progress, 
-    TextColumn, 
-    BarColumn, 
-    TaskProgressColumn, 
+    Progress,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
     TimeRemainingColumn,
     SpinnerColumn
 )
-from rich.console import Console
 from tqdm import tqdm
 
 from collection_sorter.common.logging import console

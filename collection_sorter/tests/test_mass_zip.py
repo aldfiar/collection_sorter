@@ -1,9 +1,8 @@
-import os
 import shutil
 import tempfile
-from pathlib import Path
 import unittest
 import warnings
+from pathlib import Path
 
 # DEPRECATED TEST FILE
 # This test file is testing code that was using the deprecated ArchivedCollection class.
@@ -14,7 +13,6 @@ warnings.warn(
     stacklevel=2
 )
 
-from collection_sorter.common.templates import ArchiveDirectoryTemplate
 from collection_sorter.mass_zip import ZipCollections, zip_collections, parse_args
 
 

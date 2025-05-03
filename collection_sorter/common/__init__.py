@@ -1,26 +1,17 @@
 """Common utilities for collection sorting operations."""
 
+from .components import FileCollection, FileCollectionComponent, FileMoverComponent, FileArchiverComponent
+from .file_processor import FileProcessor
 from .files import CollectionPath
 from .move import MovableCollection
-from .rename import linux_rename_function, windows_rename_function
-
+from .operations import (
+    check_path_exists, ensure_directory, list_files, list_directories,
+    move_file, copy_file, rename_file, archive_directory, extract_archive,
+    delete_file, delete_directory, move_and_rename, archive_and_delete
+)
 # New refactored modules
 from .paths import FilePath, DirectoryPath, PathType
-from .services import get_service, register_service, register_instance, register_factory
-from .components import FileCollection, FileCollectionComponent, FileMoverComponent, FileArchiverComponent
-from .strategies import (
-    FileOperationStrategy, 
-    FileOperationContext,
-    MoveFileStrategy,
-    CopyFileStrategy,
-    ArchiveStrategy,
-    ExtractArchiveStrategy,
-    RenameFileStrategy,
-    get_strategy,
-    register_strategy
-)
-from .file_processor import FileProcessor
-
+from .rename import linux_rename_function, windows_rename_function
 # Result pattern modules
 from .result import (
     Result, Success, Failure,
@@ -28,11 +19,7 @@ from .result import (
     PathResult, FilesResult, BoolResult, StringResult,
     result_handler
 )
-from .operations import (
-    check_path_exists, ensure_directory, list_files, list_directories,
-    move_file, copy_file, rename_file, archive_directory, extract_archive,
-    delete_file, delete_directory, move_and_rename, archive_and_delete
-)
+from .result_processor import ResultFileProcessor
 from .result_strategies import (
     ResultFileOperationStrategy,
     ResultFileOperationContext,
@@ -44,7 +31,18 @@ from .result_strategies import (
     DeleteFileResultStrategy,
     DeleteDirectoryResultStrategy
 )
-from .result_processor import ResultFileProcessor
+from .services import get_service, register_service, register_instance, register_factory
+from .strategies import (
+    FileOperationStrategy,
+    FileOperationContext,
+    MoveFileStrategy,
+    CopyFileStrategy,
+    ArchiveStrategy,
+    ExtractArchiveStrategy,
+    RenameFileStrategy,
+    get_strategy,
+    register_strategy
+)
 
 # Comment out the automatic import of factory modules to avoid circular imports
 # and issues with Generic type registration - these will be imported as needed

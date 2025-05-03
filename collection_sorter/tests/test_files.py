@@ -1,9 +1,10 @@
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from collection_sorter.common.files import CollectionPath
+
 
 class TestCollectionPath(unittest.TestCase):
     def setUp(self):

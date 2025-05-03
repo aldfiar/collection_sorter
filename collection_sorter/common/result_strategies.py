@@ -8,15 +8,15 @@ Result pattern for better error handling and composability.
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union
 
 from collection_sorter.common.duplicates import DuplicateHandler
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result import Result, PathResult, OperationError
 from collection_sorter.common.operations import (
     move_file, copy_file, rename_file, archive_directory, extract_archive,
     delete_file, delete_directory
 )
+from collection_sorter.common.paths import FilePath
+from collection_sorter.common.result import PathResult
 
 logger = logging.getLogger("result_strategies")
 

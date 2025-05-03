@@ -1,14 +1,10 @@
-import os
 import sys
 from pathlib import Path
-from typing import List, Optional, Dict, Any
 
 import click
-from rich.console import Console
 
-from collection_sorter.common.exceptions import CollectionSorterError, ConfigurationError
-from collection_sorter.common.logging import setup_logging, log_exception, console
-from collection_sorter.common.config_manager import config_manager
+from collection_sorter.common.logging import log_exception, console
+
 
 def print_version(ctx, param, value):
     """Print the version and exit"""

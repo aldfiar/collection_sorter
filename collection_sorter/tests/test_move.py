@@ -1,9 +1,10 @@
-import unittest
-import tempfile
 import shutil
+import tempfile
+import unittest
 from pathlib import Path
 
 from collection_sorter.common.move import MovableCollection
+
 
 class TestMovableCollection(unittest.TestCase):
     def setUp(self):

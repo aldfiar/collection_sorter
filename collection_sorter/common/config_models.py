@@ -5,9 +5,10 @@ This module contains Pydantic models that define the configuration
 structure and provide validation for different parts of the application.
 """
 
-from typing import Optional, List, Dict, Any, Union, Literal
 from pathlib import Path
-from pydantic import BaseModel, Field, validator, root_validator
+from typing import Optional, List, Dict
+
+from pydantic import BaseModel, Field, validator
 
 
 class CollectionConfig(BaseModel):

@@ -5,12 +5,12 @@ This module provides a configuration manager that handles loading, merging,
 and providing access to configuration from different sources with proper precedence.
 """
 
-import os
-import sys
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional, Union, List, Tuple, Type
 import logging
+import os
+from pathlib import Path
+from typing import Dict, Any, Optional
+
 import yaml
 
 try:
@@ -18,11 +18,11 @@ try:
 except ImportError:
     tomli = None
 
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from collection_sorter.common.exceptions import ConfigurationError
 from collection_sorter.common.config import SortConfig
-from collection_sorter.common.config_models import AppConfig, CollectionConfig
+from collection_sorter.common.config_models import AppConfig
 
 logger = logging.getLogger("config_manager")
 

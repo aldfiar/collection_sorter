@@ -7,7 +7,7 @@ and improve testability.
 """
 
 import logging
-from typing import Any, Callable, Dict, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Type, TypeVar
 
 T = TypeVar('T')
 

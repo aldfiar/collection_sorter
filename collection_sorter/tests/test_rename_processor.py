@@ -1,12 +1,12 @@
 import os
-import tempfile
-from pathlib import Path
-import unittest
 import shutil
+import tempfile
+import unittest
+from pathlib import Path
 
-from collection_sorter.common.templates_extensions import RenameProcessorTemplate
-from collection_sorter.common.paths import FilePath
 from collection_sorter.cli_handlers.rename_handler import RenameCommandHandler
+from collection_sorter.common.templates_extensions import RenameProcessorTemplate
+
 
 class TestRenameProcessor(unittest.TestCase):
     def setUp(self):

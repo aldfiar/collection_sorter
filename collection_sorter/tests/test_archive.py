@@ -1,9 +1,9 @@
-import unittest
-import tempfile
 import shutil
-from pathlib import Path
-import zipfile
+import tempfile
+import unittest
 import warnings
+import zipfile
+from pathlib import Path
 
 # DEPRECATED TEST FILE
 # This test file is for a deprecated module and should be rewritten to use the template-based implementation.

@@ -10,13 +10,12 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union, Any
+from typing import Callable, List, Optional, Union
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.exceptions import FileOperationError
-from collection_sorter.common.paths import FilePath, DirectoryPath, PathType
+from collection_sorter.common.paths import FilePath, PathType
 from collection_sorter.common.result import (
-    Result, OperationError, ErrorType, PathResult, FilesResult, BoolResult, StringResult, result_handler
+    Result, OperationError, ErrorType, PathResult, result_handler
 )
 
 logger = logging.getLogger("operations")

@@ -1,12 +1,12 @@
 import os
-import tempfile
-from pathlib import Path
-import unittest
 import shutil
+import tempfile
+import unittest
+from pathlib import Path
 
-from collection_sorter.common.templates_extensions import VideoProcessorTemplate
-from collection_sorter.common.paths import FilePath
 from collection_sorter.cli_handlers.video_handler import VideoCommandHandler
+from collection_sorter.common.templates_extensions import VideoProcessorTemplate
+
 
 class TestVideoProcessor(unittest.TestCase):
     def setUp(self):

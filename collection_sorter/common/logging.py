@@ -1,8 +1,7 @@
 import logging
-import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Union
 
 from rich.console import Console
 from rich.logging import RichHandler

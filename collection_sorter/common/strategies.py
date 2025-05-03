@@ -11,11 +11,11 @@ import shutil
 import zipfile
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union, Any
+from typing import Dict, Optional, Union, Any
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
 from collection_sorter.common.exceptions import FileOperationError
-from collection_sorter.common.paths import FilePath, DirectoryPath, PathType
+from collection_sorter.common.paths import FilePath, PathType
 
 logger = logging.getLogger("strategies")
 

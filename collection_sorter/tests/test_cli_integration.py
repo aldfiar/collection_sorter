@@ -1,12 +1,11 @@
+import importlib
 import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
-import shutil
 from pathlib import Path
-import subprocess
-import json
-import importlib
 from unittest.mock import patch, MagicMock
 
 # Check if required dependencies are installed

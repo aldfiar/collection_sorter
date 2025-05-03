@@ -2,20 +2,19 @@
 Tests for the Strategy pattern implementation.
 """
 
-import os
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
+from collection_sorter.common.file_processor import FileProcessor
 from collection_sorter.common.paths import FilePath
 from collection_sorter.common.strategies import (
     MoveFileStrategy,
     CopyFileStrategy,
     FileOperationContext
 )
-from collection_sorter.common.file_processor import FileProcessor
 
 
 class TestFileStrategies(unittest.TestCase):

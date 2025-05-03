@@ -7,28 +7,20 @@ and the Result pattern for better error handling and composability.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union, Any, Callable
+from typing import List, Optional, Union, Callable
 
 from collection_sorter.common.duplicates import DuplicateHandler
-from collection_sorter.common.paths import FilePath, DirectoryPath
-from collection_sorter.common.result import (
-    Result, OperationError, ErrorType, PathResult, FilesResult, BoolResult, StringResult
-)
 from collection_sorter.common.operations import (
     check_path_exists, ensure_directory, list_files, list_directories,
-    move_file, copy_file, rename_file, archive_directory, extract_archive,
-    delete_file, delete_directory, move_and_rename, archive_and_delete
+    move_and_rename, archive_and_delete
+)
+from collection_sorter.common.paths import FilePath
+from collection_sorter.common.result import (
+    Result, OperationError, PathResult, BoolResult
 )
 from collection_sorter.common.result_strategies import (
-    ResultFileOperationStrategy, 
+    ResultFileOperationStrategy,
     ResultFileOperationContext,
-    MoveFileResultStrategy,
-    CopyFileResultStrategy,
-    RenameFileResultStrategy,
-    ArchiveResultStrategy,
-    ExtractArchiveResultStrategy,
-    DeleteFileResultStrategy,
-    DeleteDirectoryResultStrategy,
     create_default_result_strategies
 )
 

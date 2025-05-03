@@ -2,21 +2,18 @@
 Tests for the Template Method pattern implementation.
 """
 
-import os
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.paths import FilePath
 from collection_sorter.common.result import Result, OperationError, ErrorType
 from collection_sorter.common.templates import (
     FileProcessorTemplate,
     FileMoveTemplate,
     FileCopyTemplate,
     FileRenameTemplate,
-    DirectoryProcessorTemplate,
     DirectoryCopyTemplate,
     DirectoryMoveTemplate,
     ArchiveDirectoryTemplate,

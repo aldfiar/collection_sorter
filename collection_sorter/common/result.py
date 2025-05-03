@@ -6,14 +6,14 @@ reducing reliance on exceptions and providing better composability of operations
 """
 
 from __future__ import annotations
+
 import functools
-import inspect
 import traceback
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union, cast, overload, Type
+from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar, Union, cast
 
 T = TypeVar('T')  # Success type
 E = TypeVar('E')  # Error type
@@ -492,8 +492,7 @@ class OperationError:
         """
         # Determine error type from exception
         import errno
-        import os
-        
+
         if isinstance(exception, FileNotFoundError):
             error_type = ErrorType.FILE_NOT_FOUND
         elif isinstance(exception, PermissionError):

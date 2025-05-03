@@ -9,12 +9,12 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from collection_sorter.common.duplicates import DuplicateHandler
-from collection_sorter.common.paths import FilePath, DirectoryPath
-from collection_sorter.common.result import Result, PathResult, FilesResult, OperationError, ErrorType
-from collection_sorter.common.templates import FileProcessorTemplate, DirectoryProcessorTemplate, BatchProcessorTemplate
+from collection_sorter.common.paths import FilePath
+from collection_sorter.common.result import Result, PathResult, OperationError, ErrorType
+from collection_sorter.common.templates import BatchProcessorTemplate
 
 logger = logging.getLogger("templates_extensions")
 

@@ -1,17 +1,15 @@
+import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-import shutil
-import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 # Mock the services module to prevent the error with Factory registration
 sys.modules['collection_sorter.common.services'] = MagicMock()
 
 # Import after mocking services
 from collection_sorter.cli_handlers.manga_handler import MangaCommandHandler
-from collection_sorter.common.paths import FilePath
-from collection_sorter.manga.manga_template import manga_template_function
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

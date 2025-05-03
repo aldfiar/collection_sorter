@@ -2,22 +2,18 @@
 Tests for the Result pattern implementation.
 """
 
-import os
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
-from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result import (
-    Result, OperationError, ErrorType, PathResult, 
-    BoolResult, FilesResult, result_handler
-)
 from collection_sorter.common.operations import (
-    check_path_exists, ensure_directory, list_files, list_directories,
-    move_file, copy_file, rename_file, archive_directory, extract_archive,
+    check_path_exists, ensure_directory, list_files, move_file, copy_file, rename_file, archive_directory,
+    extract_archive,
     delete_file, delete_directory
+)
+from collection_sorter.common.result import (
+    Result, OperationError, ErrorType, result_handler
 )
 from collection_sorter.common.result_processor import ResultFileProcessor
 

@@ -1,13 +1,10 @@
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
-import shutil
-import os
-import sys
 
-from collection_sorter.common.templates_extensions import MangaProcessorTemplate
-from collection_sorter.common.paths import FilePath
 from collection_sorter.cli_handlers.manga_handler import MangaCommandHandler
+from collection_sorter.common.templates_extensions import MangaProcessorTemplate
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

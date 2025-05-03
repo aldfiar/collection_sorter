@@ -8,19 +8,12 @@ file processors, strategies, and handlers based on configuration.
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Type, TypeVar, Union, Any, Generic, Callable, Set
+from typing import Dict, Optional, TypeVar, Union, Any, Generic, Callable, Set
 
 from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
+from collection_sorter.common.file_processor import FileProcessor
 from collection_sorter.common.paths import FilePath
-from collection_sorter.common.services import get_service, register_service
-from collection_sorter.common.strategies import (
-    FileOperationStrategy,
-    MoveFileStrategy,
-    CopyFileStrategy,
-    ArchiveStrategy,
-    ExtractArchiveStrategy,
-    RenameFileStrategy
-)
+from collection_sorter.common.result_processor import ResultFileProcessor
 from collection_sorter.common.result_strategies import (
     ResultFileOperationStrategy,
     MoveFileResultStrategy,
@@ -31,8 +24,15 @@ from collection_sorter.common.result_strategies import (
     DeleteFileResultStrategy,
     DeleteDirectoryResultStrategy
 )
-from collection_sorter.common.file_processor import FileProcessor
-from collection_sorter.common.result_processor import ResultFileProcessor
+from collection_sorter.common.services import register_service
+from collection_sorter.common.strategies import (
+    FileOperationStrategy,
+    MoveFileStrategy,
+    CopyFileStrategy,
+    ArchiveStrategy,
+    ExtractArchiveStrategy,
+    RenameFileStrategy
+)
 
 logger = logging.getLogger("factories")
 

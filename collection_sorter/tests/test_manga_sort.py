@@ -1,8 +1,8 @@
+import shutil
 import tempfile
+import warnings
 from pathlib import Path
 from unittest import TestCase
-import shutil
-import warnings
 
 # DEPRECATED TEST FILE
 # This test file is testing a legacy module that has been replaced.

@@ -1,9 +1,9 @@
+import os
+import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-import shutil
-import os
-import sys
 
 # Directly import the template class to bypass service registration
 sys.path.append(str(Path(__file__).parents[2]))

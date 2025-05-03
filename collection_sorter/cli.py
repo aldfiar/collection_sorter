@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 from collection_sorter.common.logging import log_exception, console
+from collection_sorter.common.config_manager import config_manager
 
 
 def print_version(ctx, param, value):

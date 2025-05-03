@@ -1,38 +1,20 @@
 """Common utilities for collection sorting operations."""
 
 from .components import FileCollection, FileCollectionComponent, FileMoverComponent, FileArchiverComponent
-from .file_processor import FileProcessor
-from .files import CollectionPath
-from .move import MovableCollection
-from .operations import (
+from collection_sorter.files.file_processor import FileProcessor
+from collection_sorter.files.files import CollectionPath
+from collection_sorter.files.move import MovableCollection
+from collection_sorter.files.operations import (
     check_path_exists, ensure_directory, list_files, list_directories,
     move_file, copy_file, rename_file, archive_directory, extract_archive,
     delete_file, delete_directory, move_and_rename, archive_and_delete
 )
 # New refactored modules
-from .paths import FilePath, DirectoryPath, PathType
-from .rename import linux_rename_function, windows_rename_function
+from collection_sorter.files.rename import linux_rename_function, windows_rename_function
 # Result pattern modules
-from .result import (
-    Result, Success, Failure,
-    OperationError, ErrorType,
-    PathResult, FilesResult, BoolResult, StringResult,
-    result_handler
-)
-from .result_processor import ResultFileProcessor
-from .result_strategies import (
-    ResultFileOperationStrategy,
-    ResultFileOperationContext,
-    MoveFileResultStrategy,
-    CopyFileResultStrategy,
-    RenameFileResultStrategy,
-    ArchiveResultStrategy,
-    ExtractArchiveResultStrategy,
-    DeleteFileResultStrategy,
-    DeleteDirectoryResultStrategy
-)
+from collection_sorter.result.result_processor import ResultFileProcessor
 from .services import get_service, register_service, register_instance, register_factory
-from .strategies import (
+from collection_sorter.strategies.strategies import (
     FileOperationStrategy,
     FileOperationContext,
     MoveFileStrategy,
@@ -64,7 +46,7 @@ _factory_names = [
 ]
 
 # Template method pattern modules
-from .templates import (
+from collection_sorter.templates.templates import (
     FileProcessorTemplate,
     FileMoveTemplate,
     FileCopyTemplate,

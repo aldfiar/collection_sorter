@@ -10,11 +10,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Optional, TypeVar, Union, Any, Generic, Callable, Set
 
-from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.file_processor import FileProcessor
-from collection_sorter.common.paths import FilePath
-from collection_sorter.common.result_processor import ResultFileProcessor
-from collection_sorter.common.result_strategies import (
+from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
+from collection_sorter.files.file_processor import FileProcessor
+from collection_sorter.files import FilePath
+from collection_sorter.result.result_processor import ResultFileProcessor
+from collection_sorter.result import (
     ResultFileOperationStrategy,
     MoveFileResultStrategy,
     CopyFileResultStrategy,
@@ -25,7 +25,7 @@ from collection_sorter.common.result_strategies import (
     DeleteDirectoryResultStrategy
 )
 from collection_sorter.common.services import register_service
-from collection_sorter.common.strategies import (
+from collection_sorter.strategies.strategies import (
     FileOperationStrategy,
     MoveFileStrategy,
     CopyFileStrategy,
@@ -396,7 +396,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         Returns:
             Configured MangaProcessorTemplate
         """
-        from collection_sorter.common.templates_extensions import MangaProcessorTemplate
+        from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
         
         # Use provided values or get from config
         dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
@@ -444,7 +444,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         Returns:
             Configured ResultFileProcessor or similar
         """
-        from collection_sorter.common.result_processor import ResultFileProcessor
+        from collection_sorter.result.result_processor import ResultFileProcessor
         
         # Use provided values or get from config
         dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
@@ -490,7 +490,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         Returns:
             Configured VideoProcessorTemplate
         """
-        from collection_sorter.common.templates_extensions import VideoProcessorTemplate
+        from collection_sorter.templates.templates_extensions import VideoProcessorTemplate
         
         # Use provided values or get from config
         dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
@@ -536,7 +536,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         if self.config is None:
             # Try to get from global config
             try:
-                from collection_sorter.common.config import get_config
+                from collection_sorter.config.config import get_config
                 config = get_config()
                 
                 # Navigate nested config structure based on dot notation

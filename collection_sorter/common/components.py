@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from collection_sorter.common.exceptions import FileOperationError
-from collection_sorter.common.paths import FilePath, PathType
+from collection_sorter.files import FilePath, PathType
 
 logger = logging.getLogger("components")
 

@@ -66,8 +66,8 @@ This allows you to handle each duplicate file individually, or choose a strategy
 If you're using Collection Sorter as a library, you can create and configure a `DuplicateHandler` instance:
 
 ```python
-from collection_sorter.common.duplicates import DuplicateHandler, DuplicateStrategy
-from collection_sorter.common.move import move_file
+from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
+from collection_sorter.files.move import move_file
 
 # Create a duplicate handler with specific strategy
 handler = DuplicateHandler(

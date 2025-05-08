@@ -43,7 +43,8 @@ def manga_sort(source=None, destination=None, archive=False, move=False, author_
     if result.is_success():
         return result.unwrap()
     else:
-        raise RuntimeError(f"Failed to process manga: {result.unwrap_error()}")
+        # Use error() instead of unwrap_error() which doesn't exist in the new Result pattern API
+        raise RuntimeError(f"Failed to process manga: {result.error()}")
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

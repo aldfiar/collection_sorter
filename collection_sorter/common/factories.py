@@ -590,23 +590,22 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         if processor_type is None:
             processor_type = self._get_config_value("processor_type", "standard")
             
-        # Get other config values
-        dry_run = kwargs.get("dry_run", self._get_config_value("dry_run", self.default_dry_run))
-        compression_level = kwargs.get("compression_level", self._get_config_value("compression_level", self.default_compression_level))
-        duplicate_strategy = kwargs.get("duplicate_strategy", self._get_config_value("duplicate_strategy", self.default_duplicate_strategy))
-        duplicates_dir = kwargs.get("duplicates_dir", self._get_config_value("duplicates_dir", None))
-        interactive = kwargs.get("interactive", self._get_config_value("interactive", False))
+        # Get other config values from config or use existing kwargs
+        params = {}
+        params["processor_type"] = processor_type
+        params["dry_run"] = kwargs.get("dry_run", self._get_config_value("dry_run", self.default_dry_run))
+        params["compression_level"] = kwargs.get("compression_level", self._get_config_value("compression_level", self.default_compression_level))
+        params["duplicate_strategy"] = kwargs.get("duplicate_strategy", self._get_config_value("duplicate_strategy", self.default_duplicate_strategy))
+        params["duplicates_dir"] = kwargs.get("duplicates_dir", self._get_config_value("duplicates_dir", None))
+        params["interactive"] = kwargs.get("interactive", self._get_config_value("interactive", False))
+        
+        # Add any remaining kwargs not explicitly handled
+        for key, value in kwargs.items():
+            if key not in params:
+                params[key] = value
         
         # Create the processor
-        return super().create(
-            processor_type=processor_type,
-            dry_run=dry_run,
-            compression_level=compression_level,
-            duplicate_strategy=duplicate_strategy,
-            duplicates_dir=duplicates_dir,
-            interactive=interactive,
-            **kwargs
-        )
+        return super().create(**params)
 
 
 # Global factory instances for easy access

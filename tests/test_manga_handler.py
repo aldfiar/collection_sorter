@@ -4,12 +4,22 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock
+import warnings
+
+# Mark this test file as deprecated
+warnings.warn(
+    "test_manga_handler.py uses the deprecated MangaCommandHandler implementation. "
+    "This test file will be removed in a future version. "
+    "Use test_manga_processor.py for the modern template-based implementation tests.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 # Mock the services module to prevent the error with Factory registration
 sys.modules['collection_sorter.common.services'] = MagicMock()
 
 # Import after mocking services
-from collection_sorter.cli_handlers.manga_handler import MangaCommandHandler
+from collection_sorter.cli_handlers.manga_handler import MangaCommandHandlerTemplateMethod as MangaCommandHandler
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

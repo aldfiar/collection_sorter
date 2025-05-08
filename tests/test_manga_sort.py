@@ -15,11 +15,35 @@ warnings.warn(
     stacklevel=2
 )
 
-# Define manga_sort function stub to allow the tests to run
+# Import the new implementation to use for compatibility
+from collection_sorter.cli_handlers.manga_handler import MangaCommandHandlerTemplateMethod
+
+# Define manga_sort function to provide backward compatibility
 def manga_sort(source=None, destination=None, archive=False, move=False, author_folders=False):
-    # This is just a stub to prevent the tests from failing
-    # Real implementation has been replaced by pattern-based code
-    pass
+    """Backward compatibility function that uses MangaCommandHandlerTemplateMethod.
+    
+    This function maintains compatibility with old tests by wrapping the new implementation.
+    """
+    # Create and execute handler
+    handler = MangaCommandHandlerTemplateMethod(
+        sources=source,
+        destination=destination,
+        archive=archive,
+        move=move,
+        dry_run=False,
+        interactive=False,
+        verbose=False,
+        author_folders=author_folders
+    )
+    
+    # Execute the handler
+    result = handler.handle()
+    
+    # Return the result data for tests to use
+    if result.is_success():
+        return result.unwrap()
+    else:
+        raise RuntimeError(f"Failed to process manga: {result.unwrap_error()}")
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

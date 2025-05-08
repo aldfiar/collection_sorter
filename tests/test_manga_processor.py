@@ -1,9 +1,18 @@
 import shutil
 import tempfile
 import unittest
+import warnings
 from pathlib import Path
 
-from collection_sorter.cli_handlers.manga_handler import MangaCommandHandler
+# Important note about the test file
+warnings.warn(
+    "This file contains the modern tests for manga processing using MangaProcessorTemplate. "
+    "For CLI handler tests use MangaCommandHandler from collection_sorter.cli_handlers.manga_handler instead.",
+    UserWarning,
+    stacklevel=2
+)
+
+from collection_sorter.cli_handlers.manga_handler import MangaCommandHandlerTemplateMethod as MangaCommandHandler
 from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
 
 # Test manga data with English fantasy/nature themed names

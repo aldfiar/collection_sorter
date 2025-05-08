@@ -5,18 +5,23 @@ import click
 from rich.console import Console
 
 from collection_sorter.config.config_manager import config_manager
-from collection_sorter.common.factories import ConfigBasedProcessorFactory
+from collection_sorter.common.factories import ConfigBasedProcessorFactory, create_duplicate_handler
 from collection_sorter.files import FilePath
-from collection_sorter.result import Result, OperationError
+from collection_sorter.result import Result, OperationError, ErrorType
 from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
 from collection_sorter.manga.manga_template import manga_template_function
-from .base_handler import TemplateMethodCommandHandler, FactoryBasedCommandHandler
+from .base_handler import CommandHandler, TemplateMethodCommandHandler, FactoryBasedCommandHandler
 
 console = Console()
 
-class MangaCommandHandler(TemplateMethodCommandHandler):
+class MangaCommandHandler(CommandHandler):
     """
     Handler for the manga command using the Template Method pattern.
+    
+    This handler leverages:
+    - Template Method pattern for the manga processing
+    - Result pattern for error handling
+    - Value Objects for file paths
     """
 
     def __init__(
@@ -27,8 +32,11 @@ class MangaCommandHandler(TemplateMethodCommandHandler):
         move: bool = False,
         dry_run: bool = False,
         interactive: bool = False,
+        duplicate_strategy: Optional[str] = None,
+        duplicates_dir: Optional[str] = None,
         verbose: bool = False,
-        author_folders: bool = False
+        author_folders: bool = False,
+        config: Optional[Dict[str, Any]] = None
     ):
         """Initialize the manga command handler.
         
@@ -39,16 +47,26 @@ class MangaCommandHandler(TemplateMethodCommandHandler):
             move: Whether to move files after processing
             dry_run: Whether to simulate operations
             interactive: Whether to prompt for confirmation
+            duplicate_strategy: Strategy for handling duplicates
+            duplicates_dir: Directory to move duplicates to
             verbose: Whether to use verbose logging
             author_folders: Whether to organize by author folders
+            config: Optional configuration dictionary
         """
-        super().__init__()
-        self.sources = [FilePath(src) for src in sources]
-        self.destination = FilePath(destination) if destination else None
+        # Initialize the parent class with required parameters
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=duplicate_strategy,
+            duplicates_dir=duplicates_dir,
+            config=config or {}
+        )
+        
+        # Store manga-specific parameters
         self.archive = archive
         self.move = move
-        self.dry_run = dry_run
-        self.interactive = interactive
         self.verbose = verbose
         self.author_folders = author_folders
         self.stats = {
@@ -68,20 +86,127 @@ class MangaCommandHandler(TemplateMethodCommandHandler):
         Returns:
             A configured MangaCommandHandler
         """
-        # Get command-specific configuration
-        cmd_config = config_manager.get_command_config("manga")
+        # Extract parameters from context
+        params = ctx.params
         
-        # Create handler
+        # Extract common parameters
+        sources = params.get("sources", [])
+        destination = params.get("destination")
+        archive = params.get("archive", False)
+        move = params.get("move", False)
+        dry_run = params.get("dry_run", False)
+        interactive = params.get("interactive", False)
+        duplicate_strategy = params.get("duplicate_strategy")
+        duplicates_dir = params.get("duplicates_dir")
+        
+        # Get configuration
+        config_manager.apply_click_context(ctx)
+        
+        # Get command-specific configuration
+        manga_config = config_manager.get_command_config("manga")
+        
+        # Get additional manga-specific parameters
+        verbose = params.get("verbose") or config_manager.config.logging.verbose
+        author_folders = manga_config.get("author_folders", False)
+        
+        # Create the handler with all parameters
         return cls(
-            sources=ctx.params.get("sources", []),
-            destination=ctx.params.get("destination") or cmd_config.get("destination"),
-            archive=ctx.params.get("archive") or cmd_config.get("archive", False),
-            move=ctx.params.get("move") or cmd_config.get("move", False),
-            dry_run=ctx.params.get("dry_run") or cmd_config.get("dry_run", False),
-            interactive=ctx.params.get("interactive") or config_manager.config.ui.interactive,
-            verbose=ctx.params.get("verbose") or config_manager.config.logging.verbose,
-            author_folders=config_manager.config.manga.author_folders
+            sources=sources,
+            destination=destination,
+            archive=archive,
+            move=move,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=duplicate_strategy,
+            duplicates_dir=duplicates_dir,
+            verbose=verbose,
+            author_folders=author_folders,
+            config=manga_config
         )
+
+    def handle(self) -> Result[Dict[str, Any], List[OperationError]]:
+        """
+        Handle the manga command.
+        
+        Returns:
+            Result with success status and statistics or list of errors
+        """
+        try:
+            # Step 1: Validate sources
+            sources_result = self.validate_sources()
+            if sources_result.is_failure():
+                return sources_result
+            
+            source_paths = sources_result.unwrap()
+            
+            # Step 2: Prepare destination
+            destination_result = self.prepare_destination()
+            if destination_result.is_failure():
+                return Result.failure([destination_result.error()])
+            
+            destination_path = destination_result.unwrap()
+            
+            # Step 3: Process each source using MangaProcessorTemplate
+            errors = []
+            processed_count = 0
+            archived_count = 0
+            moved_count = 0
+            
+            for source in source_paths:
+                # Create the manga processor template
+                template = MangaProcessorTemplate(
+                    source_path=source.value,
+                    destination_path=destination_path.value,
+                    template_func=manga_template_function,
+                    author_folders=self.author_folders,
+                    archive=self.archive,
+                    move_source=self.move,
+                    dry_run=self.dry_run,
+                    interactive=self.interactive,
+                    duplicate_handler=self.duplicate_handler
+                )
+                
+                try:
+                    # Execute the template
+                    result = template.execute()
+                    if result.is_success():
+                        data = result.unwrap()
+                        processed_count += data.get("processed", 0)
+                        archived_count += data.get("archived", 0)
+                        moved_count += data.get("moved", 0)
+                    else:
+                        errors.extend(result.unwrap_error())
+                except Exception as e:
+                    error = OperationError(
+                        type=ErrorType.OPERATION_FAILED,
+                        message=f"Failed to process {source}: {str(e)}",
+                        path=str(source),
+                        source_exception=e
+                    )
+                    errors.append(error)
+            
+            # Return success with statistics or failure with errors
+            if errors and not self.config.get("continue_on_error", False):
+                return Result.failure(errors)
+            
+            return Result.success({
+                "success": True,
+                "processed_sources": len(source_paths),
+                "processed": processed_count,
+                "archived": archived_count,
+                "moved": moved_count,
+                "errors": len(errors),
+                "failed_sources": len(errors)
+            })
+                
+        except Exception as e:
+            # Convert regular exceptions to OperationError
+            error = OperationError(
+                type=ErrorType.OPERATION_FAILED,
+                message=f"Manga command failed: {str(e)}",
+                source_exception=e
+            )
+            return Result.failure([error])
 
     def validate_sources(self) -> Result[List[FilePath], List[OperationError]]:
         """Validate source paths.
@@ -93,144 +218,52 @@ class MangaCommandHandler(TemplateMethodCommandHandler):
         valid_sources = []
         
         for source in self.sources:
-            path = Path(source.value)
-            if not path.exists():
-                errors.append(OperationError(f"Source path does not exist: {source}", path=str(source)))
-            elif not path.is_dir():
-                errors.append(OperationError(f"Source path is not a directory: {source}", path=str(source)))
-            else:
-                valid_sources.append(source)
+            try:
+                source_path = FilePath(source)
+                if not source_path.exists:
+                    error = OperationError(
+                        type=ErrorType.FILE_NOT_FOUND,
+                        message=f"Source path does not exist: {source}",
+                        path=str(source)
+                    )
+                    errors.append(error)
+                elif not source_path.is_directory:
+                    error = OperationError(
+                        type=ErrorType.INVALID_PATH,
+                        message=f"Source path is not a directory: {source}",
+                        path=str(source)
+                    )
+                    errors.append(error)
+                else:
+                    valid_sources.append(source_path)
+            except Exception as e:
+                error = OperationError(
+                    type=ErrorType.INVALID_PATH,
+                    message=f"Invalid source path: {source} - {str(e)}",
+                    path=str(source),
+                    source_exception=e
+                )
+                errors.append(error)
                 
         if not valid_sources:
+            return Result.failure(errors or [OperationError(
+                type=ErrorType.VALIDATION_ERROR,
+                message="No valid source paths provided"
+            )])
+        
+        if errors and not self.config.get("continue_on_error", False):
             return Result.failure(errors)
             
         return Result.success(valid_sources)
 
-    def prepare_destination(self) -> Result[FilePath, OperationError]:
-        """Prepare the destination directory.
-        
-        Returns:
-            Result containing the destination path or an error
-        """
-        if not self.destination:
-            return Result.failure(OperationError(
-                "Destination path is required for manga processing",
-                path="N/A"
-            ))
-            
-        dest_path = Path(self.destination.value)
-        
-        try:
-            if not dest_path.exists():
-                if not self.dry_run:
-                    dest_path.mkdir(parents=True, exist_ok=True)
-            elif not dest_path.is_dir():
-                return Result.failure(OperationError(
-                    f"Destination exists but is not a directory: {self.destination}",
-                    path=str(self.destination)
-                ))
-                
-            return Result.success(self.destination)
-            
-        except Exception as e:
-            return Result.failure(OperationError(
-                f"Failed to prepare destination directory: {str(e)}",
-                path=str(self.destination)
-            ))
 
-    def pre_process(self, 
-                  source_paths: List[FilePath], 
-                  destination_path: FilePath) -> Result[None, OperationError]:
-        """Pre-process steps before organizing manga.
-        
-        Args:
-            source_paths: Valid source paths
-            destination_path: Prepared destination path
-            
-        Returns:
-            Success result or error
-        """
-        # No specific pre-processing needed
-        return Result.success(None)
-
-    def process_sources(self, 
-                      source_paths: List[FilePath], 
-                      destination_path: FilePath) -> Result[Dict[str, Any], List[OperationError]]:
-        """Process source paths using the manga template.
-        
-        Args:
-            source_paths: Valid source paths
-            destination_path: Prepared destination path
-            
-        Returns:
-            Result containing processing statistics or errors
-        """
-        errors = []
-        processed_count = 0
-        archived_count = 0
-        moved_count = 0
-        
-        for source in source_paths:
-            # Create the manga processor template
-            template = MangaProcessorTemplate(
-                source_path=source.value,
-                destination_path=destination_path.value,
-                template_func=manga_template_function,
-                author_folders=self.author_folders,
-                archive=self.archive,
-                move_source=self.move,
-                dry_run=self.dry_run,
-                interactive=self.interactive
-            )
-            
-            try:
-                # Execute the template
-                result = template.execute()
-                if result.is_success():
-                    data = result.unwrap()
-                    processed_count += data.get("processed", 0)
-                    archived_count += data.get("archived", 0)
-                    moved_count += data.get("moved", 0)
-                else:
-                    errors.extend(result.unwrap_error())
-            except Exception as e:
-                errors.append(OperationError(
-                    f"Failed to process {source}: {str(e)}",
-                    path=str(source)
-                ))
-                
-        if errors:
-            return Result.failure(errors)
-            
-        return Result.success({
-            "processed": processed_count,
-            "archived": archived_count,
-            "moved": moved_count,
-            "errors": len(errors)
-        })
-
-    def post_process(self, 
-                   source_paths: List[FilePath], 
-                   destination_path: FilePath, 
-                   processed_data: Dict[str, Any]) -> Result[None, OperationError]:
-        """Post-process steps after organizing manga.
-        
-        Args:
-            source_paths: Valid source paths
-            destination_path: Prepared destination path
-            processed_data: Data from processing stage
-            
-        Returns:
-            Success result or error
-        """
-        # Update statistics
-        self.stats.update(processed_data)
-        return Result.success(None)
-
-
-class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
+# For backward compatibility - using MangaCommandHandlerLegacy class
+class MangaCommandHandlerTemplateMethod(TemplateMethodCommandHandler):
     """
-    Alternative handler for the manga command using the Factory pattern.
+    Legacy implementation of the manga command handler using the Template Method pattern.
+    
+    This class is maintained for backward compatibility with existing tests.
+    New code should use MangaCommandHandler instead.
     """
 
     def __init__(
@@ -242,7 +275,10 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
         dry_run: bool = False,
         interactive: bool = False,
         verbose: bool = False,
-        author_folders: bool = False
+        author_folders: bool = False,
+        duplicate_strategy: Optional[str] = None,
+        duplicates_dir: Optional[str] = None,
+        config: Optional[Dict[str, Any]] = None
     ):
         """Initialize the manga command handler.
         
@@ -255,33 +291,79 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
             interactive: Whether to prompt for confirmation
             verbose: Whether to use verbose logging
             author_folders: Whether to organize by author folders
+            duplicate_strategy: Strategy for handling duplicates
+            duplicates_dir: Directory to move duplicates to
+            config: Optional configuration dictionary
         """
-        super().__init__()
-        self.sources = [FilePath(src) for src in sources]
-        self.destination = FilePath(destination) if destination else None
+        # Pass required parameters to parent constructor
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=duplicate_strategy,
+            duplicates_dir=duplicates_dir,
+            config=config or {}
+        )
+        
+        # Store additional parameters
         self.archive = archive
         self.move = move
-        self.dry_run = dry_run
-        self.interactive = interactive
         self.verbose = verbose
         self.author_folders = author_folders
-        self.factory = ConfigBasedProcessorFactory()
         self.stats = {
             "processed": 0,
             "archived": 0,
             "moved": 0,
             "errors": 0
         }
+        
+        # Add a deprecation warning
+        import warnings
+        warnings.warn(
+            "MangaCommandHandlerTemplateMethod is deprecated. Use MangaCommandHandler instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
+    def handle(self) -> Result[Dict[str, Any], List[OperationError]]:
+        """
+        Override the handle method to ensure compatibility with tests.
+        
+        Returns:
+            Result with success status and statistics or list of errors
+        """
+        try:
+            # Use parent template method implementation
+            result = super().handle()
+            
+            # For backward compatibility, reshape the result data to match tests
+            if result.is_success():
+                data = result.unwrap()
+                # Add processed, archived, moved fields from stats
+                data.update(self.stats)
+                return Result.success(data)
+            else:
+                return result
+                
+        except Exception as e:
+            # Convert regular exceptions to OperationError
+            error = OperationError(
+                type=ErrorType.OPERATION_FAILED,
+                message=f"Manga command failed: {str(e)}",
+                source_exception=e
+            )
+            return Result.failure([error])
 
     @classmethod
-    def from_click_context(cls, ctx: click.Context) -> "MangaCommandHandlerAlternative":
+    def from_click_context(cls, ctx: click.Context) -> "MangaCommandHandlerTemplateMethod":
         """Create a handler from a Click context.
         
         Args:
             ctx: Click context
             
         Returns:
-            A configured MangaCommandHandler
+            A configured MangaCommandHandlerTemplateMethod
         """
         # Get command-specific configuration
         cmd_config = config_manager.get_command_config("manga")
@@ -295,7 +377,221 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
             dry_run=ctx.params.get("dry_run") or cmd_config.get("dry_run", False),
             interactive=ctx.params.get("interactive") or config_manager.config.ui.interactive,
             verbose=ctx.params.get("verbose") or config_manager.config.logging.verbose,
-            author_folders=config_manager.config.manga.author_folders
+            author_folders=config_manager.config.manga.author_folders,
+            duplicate_strategy=ctx.params.get("duplicate_strategy"),
+            duplicates_dir=ctx.params.get("duplicates_dir"),
+            config=cmd_config
+        )
+
+    def pre_process(self, 
+                  source_paths: List[FilePath], 
+                  destination_path: Optional[FilePath]) -> Result[bool, List[OperationError]]:
+        """Pre-process steps before organizing manga.
+        
+        Args:
+            source_paths: Valid source paths
+            destination_path: Prepared destination path
+            
+        Returns:
+            Success result or error
+        """
+        # No specific pre-processing needed
+        if destination_path is None:
+            return Result.failure([OperationError(
+                type=ErrorType.VALIDATION_ERROR,
+                message="Destination path is required for manga processing",
+                path="N/A"
+            )])
+        return Result.success(True)
+
+    def process_sources(self, 
+                      source_paths: List[FilePath], 
+                      destination_path: Optional[FilePath]) -> Result[List[Dict[str, Any]], List[OperationError]]:
+        """Process source paths using the manga template.
+        
+        Args:
+            source_paths: Valid source paths
+            destination_path: Prepared destination path
+            
+        Returns:
+            Result containing processing statistics or errors
+        """
+        if destination_path is None:
+            return Result.failure([OperationError(
+                type=ErrorType.VALIDATION_ERROR,
+                message="Destination path is required for manga processing",
+                path="N/A"
+            )])
+            
+        errors = []
+        processed_items = []
+        
+        for source in source_paths:
+            # Create the manga processor template
+            template = MangaProcessorTemplate(
+                source_path=source.value,
+                destination_path=destination_path.value,
+                template_func=manga_template_function,
+                author_folders=self.author_folders,
+                archive=self.archive,
+                move_source=self.move,
+                dry_run=self.dry_run,
+                interactive=self.interactive,
+                duplicate_handler=self.duplicate_handler
+            )
+            
+            try:
+                # Execute the template
+                result = template.execute()
+                if result.is_success():
+                    data = result.unwrap()
+                    self.stats["processed"] += data.get("processed", 0)
+                    self.stats["archived"] += data.get("archived", 0)
+                    self.stats["moved"] += data.get("moved", 0)
+                    processed_items.append(data)
+                else:
+                    errors.extend(result.unwrap_error())
+            except Exception as e:
+                errors.append(OperationError(
+                    type=ErrorType.OPERATION_FAILED,
+                    message=f"Failed to process {source}: {str(e)}",
+                    path=str(source),
+                    source_exception=e
+                ))
+                
+        if errors:
+            return Result.failure(errors)
+            
+        return Result.success(processed_items)
+
+    def post_process(self, 
+                   source_paths: List[FilePath], 
+                   destination_path: Optional[FilePath], 
+                   processed_items: List[Dict[str, Any]]) -> Result[bool, List[OperationError]]:
+        """Post-process steps after organizing manga.
+        
+        Args:
+            source_paths: Valid source paths
+            destination_path: Prepared destination path
+            processed_items: Items processed by process_sources
+            
+        Returns:
+            Success result or error
+        """
+        # No specific post-processing needed
+        return Result.success(True)
+
+
+class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
+    """
+    Alternative handler for the manga command using the Factory pattern.
+    
+    This handler leverages the Factory pattern to create processors for handling manga.
+    """
+
+    def __init__(
+        self, 
+        sources: List[str],
+        destination: Optional[str] = None,
+        archive: bool = False,
+        move: bool = False,
+        dry_run: bool = False,
+        interactive: bool = False,
+        duplicate_strategy: Optional[str] = None,
+        duplicates_dir: Optional[str] = None,
+        verbose: bool = False,
+        author_folders: bool = False,
+        config: Optional[Dict[str, Any]] = None,
+        processor_type: str = "result"
+    ):
+        """Initialize the manga command handler.
+        
+        Args:
+            sources: List of source paths to process
+            destination: Optional destination path
+            archive: Whether to create archives
+            move: Whether to move files after processing
+            dry_run: Whether to simulate operations
+            interactive: Whether to prompt for confirmation
+            duplicate_strategy: Strategy for handling duplicates
+            duplicates_dir: Directory to move duplicates to
+            verbose: Whether to use verbose logging
+            author_folders: Whether to organize by author folders
+            config: Optional configuration dictionary
+            processor_type: Type of processor to create ("standard" or "result")
+        """
+        # Initialize parent class with required parameters
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=duplicate_strategy,
+            duplicates_dir=duplicates_dir,
+            config=config or {},
+            processor_type=processor_type
+        )
+        
+        # Store manga-specific parameters
+        self.archive = archive
+        self.move = move
+        self.verbose = verbose
+        self.author_folders = author_folders
+        
+        # Create a dynamic configuration object with manga-specific options
+        self.dynamic_config.update({
+            "archive": archive,
+            "move": move,
+            "author_folders": author_folders
+        })
+
+    @classmethod
+    def from_click_context(cls, ctx: click.Context) -> "MangaCommandHandlerAlternative":
+        """Create a handler from a Click context.
+        
+        Args:
+            ctx: Click context
+            
+        Returns:
+            A configured MangaCommandHandlerAlternative
+        """
+        # Extract parameters from context
+        params = ctx.params
+        
+        # Extract common parameters
+        sources = params.get("sources", [])
+        destination = params.get("destination")
+        archive = params.get("archive", False)
+        move = params.get("move", False)
+        dry_run = params.get("dry_run", False)
+        interactive = params.get("interactive", False)
+        duplicate_strategy = params.get("duplicate_strategy")
+        duplicates_dir = params.get("duplicates_dir")
+        
+        # Get configuration
+        config_manager.apply_click_context(ctx)
+        
+        # Get command-specific configuration
+        manga_config = config_manager.get_command_config("manga")
+        
+        # Get additional manga-specific parameters
+        verbose = params.get("verbose") or config_manager.config.logging.verbose
+        author_folders = manga_config.get("author_folders", False)
+        
+        # Create the handler
+        return cls(
+            sources=sources,
+            destination=destination,
+            archive=archive,
+            move=move,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=duplicate_strategy,
+            duplicates_dir=duplicates_dir,
+            verbose=verbose,
+            author_folders=author_folders,
+            config=manga_config,
+            processor_type="result"
         )
 
     def process_source(self, source: FilePath, destination: Optional[FilePath]) -> Result[Dict[str, Any], OperationError]:
@@ -310,7 +606,8 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
         """
         if not destination:
             return Result.failure(OperationError(
-                "Destination path is required for manga processing",
+                type=ErrorType.VALIDATION_ERROR,
+                message="Destination path is required for manga processing",
                 path=str(source)
             ))
             
@@ -331,19 +628,12 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
                 move_source=self.move
             )
             
-            if result.is_success():
-                # Update statistics
-                data = result.unwrap()
-                self.stats["processed"] += data.get("processed", 0)
-                self.stats["archived"] += data.get("archived", 0)
-                self.stats["moved"] += data.get("moved", 0)
-                return Result.success(data)
-            else:
-                return result
+            return result
                 
         except Exception as e:
-            self.stats["errors"] += 1
             return Result.failure(OperationError(
-                f"Failed to process {source}: {str(e)}",
-                path=str(source)
+                type=ErrorType.OPERATION_FAILED,
+                message=f"Failed to process {source}: {str(e)}",
+                path=str(source),
+                source_exception=e
             ))

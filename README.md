@@ -12,6 +12,17 @@ A powerful command-line tool for organizing and processing various file collecti
 - **Rich Feedback**: Colorful console output with progress bars
 - **Configuration System**: Use config files and environment variables to store preferences
 - **Detailed Logging**: Configurable logging with file output support
+- **Duplicate Handling**: Multiple strategies for handling duplicate files
+
+## Architecture
+
+Collection Sorter uses several design patterns to ensure maintainability and flexibility:
+
+- **Command Pattern**: CLI commands are implemented as separate handlers
+- **Template Method Pattern**: Common file processing steps defined in base classes with customizable steps
+- **Factory Pattern**: Dynamic creation of processors based on configuration
+- **Result Pattern**: Functional error handling without exceptions
+- **Strategy Pattern**: Pluggable strategies for file operations
 
 ## Installation
 
@@ -74,9 +85,11 @@ Sort and organize manga collections:
 collection-sorter manga <source_directories...> [OPTIONS]
 ```
 
+The manga command parses manga filenames in formats like `[Group/Circle (Author)] Manga Title [Optional tags]` and organizes them by author and series.
+
 ### Batch Renaming
 
-Rename files in bulk:
+Rename files in bulk using patterns:
 
 ```bash
 collection-sorter rename <source_directories...> [OPTIONS]
@@ -98,6 +111,8 @@ Rename video files with standardized formatting:
 collection-sorter video <source_directories...> [OPTIONS]
 ```
 
+The video command detects season and episode information in formats like `S01E01` or `1x01`.
+
 ## Common Options
 
 All commands support these options:
@@ -111,6 +126,8 @@ All commands support these options:
 - `--log-file PATH`: Path to log file
 - `--log-level LEVEL`: Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 - `--config PATH`: Path to config file
+- `--duplicate-strategy`: Strategy for handling duplicate files (skip, rename_new, rename_existing, overwrite, move_to_duplicates, ask)
+- `--duplicates-dir`: Directory to move duplicates to when using move_to_duplicates strategy
 
 ## Configuration
 
@@ -118,7 +135,7 @@ You can configure Collection Sorter through:
 
 1. **Command-line Arguments**: Highest priority
 2. **Environment Variables**: Prefixed with `COLLECTION_SORTER_`
-3. **Config Files**: YAML format in:
+3. **Config Files**: YAML, TOML, or JSON format in:
    - `./collection_sorter.yaml` (current directory)
    - `~/.collection_sorter.yaml` (home directory)
    - `~/.config/collection_sorter/config.yaml` (config directory)
@@ -126,14 +143,42 @@ You can configure Collection Sorter through:
 Example config file:
 ```yaml
 # collection_sorter.yaml
-destination: ~/Organized
-archive: true
-move: false
-dry_run: false
-interactive: true
-verbose: false
-log_file: ~/.collection_sorter.log
-log_level: INFO
+collection:
+  destination: ~/Organized
+  archive: true
+  move: false
+  dry_run: false
+
+logging:
+  verbose: false
+  log_file: ~/.collection_sorter.log
+  log_level: INFO
+
+ui:
+  interactive: true
+  progress_bars: true
+  color_output: true
+
+# Command-specific settings
+manga:
+  author_folders: false
+  template: null
+
+video:
+  subtitle_extensions:
+    - .srt
+    - .sub
+    - .ass
+  video_extensions:
+    - .mp4
+    - .mkv
+    - .avi
+    - .mov
+```
+
+Generate a configuration template:
+```bash
+collection-sorter generate-config --format yaml --output ~/.config/collection_sorter/config.yaml
 ```
 
 ## Examples
@@ -161,6 +206,11 @@ collection-sorter rename ~/Documents/messy -d ~/Documents/organized --dry-run
 5. Use verbose mode to see detailed progress:
 ```bash
 collection-sorter manga ~/Downloads/manga -v
+```
+
+6. Configure duplicate handling:
+```bash
+collection-sorter rename ~/Files -d ~/Organized --duplicate-strategy rename_new
 ```
 
 ## Development

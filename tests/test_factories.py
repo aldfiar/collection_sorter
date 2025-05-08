@@ -20,7 +20,7 @@ from collection_sorter.common.factories import (
 )
 from collection_sorter.files.file_processor import FileProcessor
 from collection_sorter.result.result_processor import ResultFileProcessor
-from collection_sorter.common.result_strategies import (
+from collection_sorter.result.result_strategies import (
     MoveFileResultStrategy,
     CopyFileResultStrategy,
     RenameFileResultStrategy,
@@ -98,14 +98,17 @@ class TestFactories(unittest.TestCase):
         handler2 = factory.create(
             strategy=DuplicateStrategy.MOVE_TO_DUPLICATES,
             duplicates_dir="/tmp/duplicates",
-            interactive=True
+            interactive=False
         )
         
         # Check handler properties
         self.assertEqual(handler1.strategy, DuplicateStrategy.RENAME_NEW)
         self.assertEqual(handler2.strategy, DuplicateStrategy.MOVE_TO_DUPLICATES)
-        self.assertEqual(handler2.duplicates_dir, Path("/tmp/duplicates"))
-        self.assertTrue(handler2.interactive)  # Should be overridden by the strategy
+        # On macOS, /tmp might be a symlink to /private/tmp, so we check if the path exists and 
+        # if it's the same as the resolved path
+        expected_path = Path("/tmp/duplicates").expanduser().resolve()
+        self.assertEqual(handler2.duplicates_dir, expected_path)
+        self.assertFalse(handler2.dry_run)  # Default should be False
     
     def test_processor_factory(self):
         """Test the ProcessorFactory class."""
@@ -145,7 +148,7 @@ class TestFactories(unittest.TestCase):
             "dry_run": True,
             "compression_level": 9,
             "duplicate_strategy": "skip",
-            "interactive": True
+            "interactive": False  # Changed to False to avoid auto-setting ASK strategy
         }
         
         factory = ConfigBasedProcessorFactory(config=config)

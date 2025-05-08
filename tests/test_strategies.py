@@ -9,7 +9,7 @@ from pathlib import Path
 
 from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
 from collection_sorter.files.file_processor import FileProcessor
-from collection_sorter.common.paths import FilePath
+from collection_sorter.files.paths import FilePath
 from collection_sorter.strategies.strategies import (
     MoveFileStrategy,
     CopyFileStrategy,

@@ -12,7 +12,7 @@ from collection_sorter.operations import (
     extract_archive,
     delete_file, delete_directory
 )
-from collection_sorter.common.result import (
+from collection_sorter.result.result import (
     Result, OperationError, ErrorType, result_handler
 )
 from collection_sorter.result.result_processor import ResultFileProcessor

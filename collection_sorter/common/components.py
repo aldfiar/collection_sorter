@@ -12,9 +12,18 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from collection_sorter.common.exceptions import FileOperationError
-from collection_sorter.files import FilePath, PathType
+
+# Forward references for type hints
+FilePath = Union[str, Path, 'FilePath'] 
+PathType = None  # Will be defined later after actual import
 
 logger = logging.getLogger("components")
+
+def _to_path(path) -> Path:
+    """Convert a path-like object to a Path object."""
+    if hasattr(path, 'path'):  # FilePath-like object
+        return path.path
+    return Path(path).expanduser().resolve()
 
 
 class FileComponent(ABC):
@@ -34,52 +43,56 @@ class FileCollectionComponent(FileComponent):
     that just handles file collection operations.
     """
     
-    def __init__(self, path: Union[str, Path, FilePath]):
+    def __init__(self, path: Union[str, Path, 'FilePath']):
         """
         Initialize the file collection component.
         
         Args:
             path: Root path for the collection
         """
-        self.root_path = FilePath(path)
+        # Convert to Path directly to avoid circular import
+        self._path = _to_path(path)
+        
+        # Will be replaced with actual FilePath once imports are resolved
+        self.root_path = None
     
     def get_name(self) -> str:
         """Get the name of this component."""
         return "FileCollection"
     
-    def get_files(self) -> List[FilePath]:
+    def get_files(self) -> List[Path]:
         """
         Get all files in the collection.
         
         Returns:
             List of file paths
         """
-        if not self.root_path.is_directory:
-            return [self.root_path] if self.root_path.is_file else []
+        if not self._path.is_dir():
+            return [self._path] if self._path.is_file() else []
         
-        return self.root_path.list_files()
+        return [p for p in self._path.iterdir() if p.is_file()]
     
-    def get_directories(self) -> List[FilePath]:
+    def get_directories(self) -> List[Path]:
         """
         Get all directories in the collection.
         
         Returns:
             List of directory paths
         """
-        if not self.root_path.is_directory:
+        if not self._path.is_dir():
             return []
         
-        return self.root_path.list_dirs()
+        return [p for p in self._path.iterdir() if p.is_dir()]
     
-    def collect_all_files(self) -> List[FilePath]:
+    def collect_all_files(self) -> List[Path]:
         """
         Recursively collect all files in the collection.
         
         Returns:
             List of all file paths
         """
-        if not self.root_path.is_directory:
-            return [self.root_path] if self.root_path.is_file else []
+        if not self._path.is_dir():
+            return [self._path] if self._path.is_file() else []
         
         result = []
         
@@ -93,7 +106,7 @@ class FileCollectionComponent(FileComponent):
         
         return result
     
-    def map_files(self, function: Callable[[FilePath], None]) -> None:
+    def map_files(self, function: Callable[[Path], None]) -> None:
         """
         Apply a function to each file in the collection.
         
@@ -133,9 +146,9 @@ class FileMoverComponent(FileComponent):
     
     def move_file(
         self, 
-        source: Union[str, Path, FilePath],
-        destination: Union[str, Path, FilePath]
-    ) -> FilePath:
+        source: Union[str, Path, 'FilePath'],
+        destination: Union[str, Path, 'FilePath']
+    ) -> Path:
         """
         Move a file to a new location.
         
@@ -149,29 +162,34 @@ class FileMoverComponent(FileComponent):
         Raises:
             FileOperationError: If the move fails
         """
-        src_path = FilePath(source, PathType.FILE)
-        dest_path = FilePath(destination, must_exist=False)
+        src_path = _to_path(source)
+        dest_path = _to_path(destination)
+        
+        # Verify source is a file
+        if not src_path.is_file():
+            raise FileOperationError(f"Source is not a file: {src_path}", path=str(src_path))
         
         # Create parent directories if needed
         if self.create_parents:
             parent = dest_path.parent
-            if not parent.exists and not self.dry_run:
-                parent.path.mkdir(parents=True, exist_ok=True)
+            if not parent.exists() and not self.dry_run:
+                parent.mkdir(parents=True, exist_ok=True)
         
         if self.dry_run:
             logger.info(f"Would move file: {src_path} -> {dest_path}")
             return dest_path
         
         try:
-            return src_path.move_to(dest_path)
+            import shutil
+            return Path(shutil.move(src_path, dest_path))
         except Exception as e:
             raise FileOperationError(f"Failed to move file: {e}", path=str(src_path))
     
     def copy_file(
         self,
-        source: Union[str, Path, FilePath],
-        destination: Union[str, Path, FilePath]
-    ) -> FilePath:
+        source: Union[str, Path, 'FilePath'],
+        destination: Union[str, Path, 'FilePath']
+    ) -> Path:
         """
         Copy a file to a new location.
         
@@ -185,29 +203,34 @@ class FileMoverComponent(FileComponent):
         Raises:
             FileOperationError: If the copy fails
         """
-        src_path = FilePath(source, PathType.FILE)
-        dest_path = FilePath(destination, must_exist=False)
+        src_path = _to_path(source)
+        dest_path = _to_path(destination)
+        
+        # Verify source is a file
+        if not src_path.is_file():
+            raise FileOperationError(f"Source is not a file: {src_path}", path=str(src_path))
         
         # Create parent directories if needed
         if self.create_parents:
             parent = dest_path.parent
-            if not parent.exists and not self.dry_run:
-                parent.path.mkdir(parents=True, exist_ok=True)
+            if not parent.exists() and not self.dry_run:
+                parent.mkdir(parents=True, exist_ok=True)
         
         if self.dry_run:
             logger.info(f"Would copy file: {src_path} -> {dest_path}")
             return dest_path
         
         try:
-            return src_path.copy_to(dest_path)
+            import shutil
+            return Path(shutil.copy2(src_path, dest_path))
         except Exception as e:
             raise FileOperationError(f"Failed to copy file: {e}", path=str(src_path))
     
     def move_directory(
         self,
-        source: Union[str, Path, FilePath],
-        destination: Union[str, Path, FilePath]
-    ) -> FilePath:
+        source: Union[str, Path, 'FilePath'],
+        destination: Union[str, Path, 'FilePath']
+    ) -> Path:
         """
         Move a directory to a new location.
         
@@ -221,29 +244,34 @@ class FileMoverComponent(FileComponent):
         Raises:
             FileOperationError: If the move fails
         """
-        src_path = FilePath(source, PathType.DIRECTORY)
-        dest_path = FilePath(destination, must_exist=False)
+        src_path = _to_path(source)
+        dest_path = _to_path(destination)
+        
+        # Verify source is a directory
+        if not src_path.is_dir():
+            raise FileOperationError(f"Source is not a directory: {src_path}", path=str(src_path))
         
         # Create parent directories if needed
         if self.create_parents:
             parent = dest_path.parent
-            if not parent.exists and not self.dry_run:
-                parent.path.mkdir(parents=True, exist_ok=True)
+            if not parent.exists() and not self.dry_run:
+                parent.mkdir(parents=True, exist_ok=True)
         
         if self.dry_run:
             logger.info(f"Would move directory: {src_path} -> {dest_path}")
             return dest_path
         
         try:
-            return src_path.move_to(dest_path)
+            import shutil
+            return Path(shutil.move(src_path, dest_path))
         except Exception as e:
             raise FileOperationError(f"Failed to move directory: {e}", path=str(src_path))
     
     def copy_directory(
         self,
-        source: Union[str, Path, FilePath],
-        destination: Union[str, Path, FilePath]
-    ) -> FilePath:
+        source: Union[str, Path, 'FilePath'],
+        destination: Union[str, Path, 'FilePath']
+    ) -> Path:
         """
         Copy a directory to a new location.
         
@@ -257,21 +285,26 @@ class FileMoverComponent(FileComponent):
         Raises:
             FileOperationError: If the copy fails
         """
-        src_path = FilePath(source, PathType.DIRECTORY)
-        dest_path = FilePath(destination, must_exist=False)
+        src_path = _to_path(source)
+        dest_path = _to_path(destination)
+        
+        # Verify source is a directory
+        if not src_path.is_dir():
+            raise FileOperationError(f"Source is not a directory: {src_path}", path=str(src_path))
         
         # Create parent directories if needed
         if self.create_parents:
             parent = dest_path.parent
-            if not parent.exists and not self.dry_run:
-                parent.path.mkdir(parents=True, exist_ok=True)
+            if not parent.exists() and not self.dry_run:
+                parent.mkdir(parents=True, exist_ok=True)
         
         if self.dry_run:
             logger.info(f"Would copy directory: {src_path} -> {dest_path}")
             return dest_path
         
         try:
-            return src_path.copy_to(dest_path)
+            import shutil
+            return Path(shutil.copytree(src_path, dest_path))
         except Exception as e:
             raise FileOperationError(f"Failed to copy directory: {e}", path=str(src_path))
 
@@ -303,7 +336,7 @@ class FileArchiverComponent(FileComponent):
         """Get the name of this component."""
         return "FileArchiver"
     
-    def is_archive(self, path: Union[str, Path, FilePath]) -> bool:
+    def is_archive(self, path: Union[str, Path, 'FilePath']) -> bool:
         """
         Check if a path is an archive file.
         
@@ -313,19 +346,19 @@ class FileArchiverComponent(FileComponent):
         Returns:
             True if the path is an archive file, False otherwise
         """
-        file_path = FilePath(path)
+        file_path = _to_path(path)
         return (
-            file_path.exists and 
-            file_path.is_file and 
+            file_path.exists() and 
+            file_path.is_file() and 
             file_path.suffix.lower() == '.zip'
         )
     
     def archive_directory(
         self,
-        source: Union[str, Path, FilePath],
-        destination: Optional[Union[str, Path, FilePath]] = None,
+        source: Union[str, Path, 'FilePath'],
+        destination: Optional[Union[str, Path, 'FilePath']] = None,
         archive_name: Optional[str] = None
-    ) -> FilePath:
+    ) -> Path:
         """
         Archive a directory to a ZIP file.
         
@@ -340,7 +373,11 @@ class FileArchiverComponent(FileComponent):
         Raises:
             FileOperationError: If archiving fails
         """
-        src_path = FilePath(source, PathType.DIRECTORY)
+        src_path = _to_path(source)
+        
+        # Verify source is a directory
+        if not src_path.is_dir():
+            raise FileOperationError(f"Source is not a directory: {src_path}", path=str(src_path))
         
         # Determine archive name
         name = archive_name or src_path.name
@@ -348,20 +385,22 @@ class FileArchiverComponent(FileComponent):
         
         # Determine destination path
         if destination:
-            dest_dir = FilePath(destination, PathType.DIRECTORY, create_if_missing=True)
-            archive_path = dest_dir.join(archive_filename)
+            dest_path = _to_path(destination)
+            if not dest_path.exists() and not self.dry_run:
+                dest_path.mkdir(parents=True, exist_ok=True)
+            archive_path = dest_path / archive_filename
         else:
-            dest_dir = src_path.parent
-            archive_path = dest_dir.join(archive_filename)
+            dest_path = src_path.parent
+            archive_path = dest_path / archive_filename
         
         if self.dry_run:
             logger.info(f"Would archive directory: {src_path} -> {archive_path}")
-            return FilePath(archive_path.path, must_exist=False)
+            return archive_path
         
         try:
             # Create the archive
             with zipfile.ZipFile(
-                archive_path.path, 
+                archive_path, 
                 'w', 
                 compression=zipfile.ZIP_DEFLATED,
                 compresslevel=self.compression_level
@@ -371,25 +410,25 @@ class FileArchiverComponent(FileComponent):
                     # Calculate the path within the archive
                     if archive_name:
                         # Use custom name as root in archive
-                        rel_path = Path(archive_name) / file.path.relative_to(src_path.path)
+                        rel_path = Path(archive_name) / file.relative_to(src_path)
                     else:
                         # Use original directory structure
-                        rel_path = file.path.relative_to(src_path.parent.path)
+                        rel_path = file.relative_to(src_path.parent)
                     
                     # Add to archive
-                    zf.write(file.path, rel_path)
+                    zf.write(file, rel_path)
             
             logger.info(f"Archived directory: {src_path} -> {archive_path}")
-            return FilePath(archive_path.path)
+            return archive_path
             
         except Exception as e:
             raise FileOperationError(f"Failed to create archive: {e}", path=str(src_path))
     
     def extract_archive(
         self,
-        source: Union[str, Path, FilePath],
-        destination: Optional[Union[str, Path, FilePath]] = None
-    ) -> FilePath:
+        source: Union[str, Path, 'FilePath'],
+        destination: Optional[Union[str, Path, 'FilePath']] = None
+    ) -> Path:
         """
         Extract a ZIP archive to a directory.
         
@@ -403,31 +442,33 @@ class FileArchiverComponent(FileComponent):
         Raises:
             FileOperationError: If extraction fails
         """
-        src_path = FilePath(source)
+        src_path = _to_path(source)
         
         if not self.is_archive(src_path):
             raise FileOperationError(f"Not a ZIP archive: {src_path}", path=str(src_path))
         
         # Determine destination path
         if destination:
-            dest_dir = FilePath(destination, PathType.DIRECTORY, create_if_missing=True)
+            dest_path = _to_path(destination)
+            if not dest_path.exists() and not self.dry_run:
+                dest_path.mkdir(parents=True, exist_ok=True)
         else:
             # Extract to a directory with the same name as the archive (without extension)
-            dest_dir = src_path.parent.join(src_path.stem)
+            dest_path = src_path.parent / src_path.stem
             if not self.dry_run:
-                dest_dir.path.mkdir(parents=True, exist_ok=True)
+                dest_path.mkdir(parents=True, exist_ok=True)
         
         if self.dry_run:
-            logger.info(f"Would extract archive: {src_path} -> {dest_dir}")
-            return dest_dir
+            logger.info(f"Would extract archive: {src_path} -> {dest_path}")
+            return dest_path
         
         try:
             # Extract the archive
-            with zipfile.ZipFile(src_path.path) as zf:
-                zf.extractall(dest_dir.path)
+            with zipfile.ZipFile(src_path) as zf:
+                zf.extractall(dest_path)
             
-            logger.info(f"Extracted archive: {src_path} -> {dest_dir}")
-            return dest_dir
+            logger.info(f"Extracted archive: {src_path} -> {dest_path}")
+            return dest_path
             
         except Exception as e:
             raise FileOperationError(f"Failed to extract archive: {e}", path=str(src_path))
@@ -443,7 +484,7 @@ class FileCollection:
     
     def __init__(
         self,
-        path: Union[str, Path, FilePath],
+        path: Union[str, Path, 'FilePath'],
         dry_run: bool = False,
         compression_level: int = 6
     ):
@@ -464,31 +505,31 @@ class FileCollection:
         )
         
         # Store the root path
-        self.root_path = self.collector.root_path
+        self._path = _to_path(path)
     
     @property
     def path(self) -> Path:
         """Get the root path of the collection."""
-        return self.root_path.path
+        return self._path
     
     @property
     def name(self) -> str:
         """Get the name of the root path."""
-        return self.root_path.name
+        return self._path.name
     
-    def get_files(self) -> List[FilePath]:
+    def get_files(self) -> List[Path]:
         """Get all files in the collection."""
         return self.collector.get_files()
     
-    def get_directories(self) -> List[FilePath]:
+    def get_directories(self) -> List[Path]:
         """Get all directories in the collection."""
         return self.collector.get_directories()
     
-    def collect_all_files(self) -> List[FilePath]:
+    def collect_all_files(self) -> List[Path]:
         """Recursively collect all files in the collection."""
         return self.collector.collect_all_files()
     
-    def move_to(self, destination: Union[str, Path, FilePath]) -> "FileCollection":
+    def move_to(self, destination: Union[str, Path, 'FilePath']) -> "FileCollection":
         """
         Move the collection to a new location.
         
@@ -498,14 +539,14 @@ class FileCollection:
         Returns:
             New FileCollection at the destination
         """
-        dest_path = FilePath(destination, must_exist=False)
+        dest_path = _to_path(destination)
         
-        if self.root_path.is_file:
+        if self._path.is_file():
             # Move a single file
-            moved_path = self.mover.move_file(self.root_path, dest_path)
+            moved_path = self.mover.move_file(self._path, dest_path)
         else:
             # Move a directory
-            moved_path = self.mover.move_directory(self.root_path, dest_path)
+            moved_path = self.mover.move_directory(self._path, dest_path)
         
         # Return a new collection at the destination
         return FileCollection(
@@ -514,7 +555,7 @@ class FileCollection:
             compression_level=self.archiver.compression_level
         )
     
-    def copy_to(self, destination: Union[str, Path, FilePath]) -> "FileCollection":
+    def copy_to(self, destination: Union[str, Path, 'FilePath']) -> "FileCollection":
         """
         Copy the collection to a new location.
         
@@ -524,14 +565,14 @@ class FileCollection:
         Returns:
             New FileCollection at the destination
         """
-        dest_path = FilePath(destination, must_exist=False)
+        dest_path = _to_path(destination)
         
-        if self.root_path.is_file:
+        if self._path.is_file():
             # Copy a single file
-            copied_path = self.mover.copy_file(self.root_path, dest_path)
+            copied_path = self.mover.copy_file(self._path, dest_path)
         else:
             # Copy a directory
-            copied_path = self.mover.copy_directory(self.root_path, dest_path)
+            copied_path = self.mover.copy_directory(self._path, dest_path)
         
         # Return a new collection at the destination
         return FileCollection(
@@ -542,9 +583,9 @@ class FileCollection:
     
     def archive_to(
         self,
-        destination: Optional[Union[str, Path, FilePath]] = None,
+        destination: Optional[Union[str, Path, 'FilePath']] = None,
         archive_name: Optional[str] = None
-    ) -> FilePath:
+    ) -> Path:
         """
         Archive the collection to a ZIP file.
         
@@ -555,20 +596,22 @@ class FileCollection:
         Returns:
             Path to the created archive
         """
-        if self.root_path.is_file:
+        if self._path.is_file():
             # Create a temporary directory with just this file
             import tempfile
             temp_dir = tempfile.mkdtemp()
-            temp_path = FilePath(temp_dir, PathType.DIRECTORY, create_if_missing=True)
+            temp_path = Path(temp_dir)
+            if not temp_path.exists():
+                temp_path.mkdir(parents=True, exist_ok=True)
             
             # Copy the file to the temporary directory
-            self.mover.copy_file(self.root_path, temp_path.join(self.root_path.name))
+            self.mover.copy_file(self._path, temp_path / self._path.name)
             
             # Archive the temporary directory
             archive_path = self.archiver.archive_directory(
                 temp_path,
                 destination,
-                archive_name or self.root_path.stem
+                archive_name or self._path.stem
             )
             
             # Clean up
@@ -580,12 +623,12 @@ class FileCollection:
         else:
             # Archive the directory
             return self.archiver.archive_directory(
-                self.root_path,
+                self._path,
                 destination,
                 archive_name
             )
     
-    def map_files(self, function: Callable[[FilePath], None]) -> None:
+    def map_files(self, function: Callable[[Path], None]) -> None:
         """
         Apply a function to each file in the collection.
         

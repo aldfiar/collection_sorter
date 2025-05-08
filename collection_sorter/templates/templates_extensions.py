@@ -375,36 +375,53 @@ class MangaProcessorTemplate(BatchProcessorTemplate):
                 # Archive the entire directory
                 from zipfile import ZipFile, ZIP_DEFLATED
                 
-                # Create the archive path
-                archive_name = self.source_path.name.replace(" ", "_")
-                archive_path = self.destination_path.join(f"{self.source_path.name}.zip")
+                # Create author directory in destination 
+                author_dest = self.destination_path.join(self.source_path.name)
+                if not author_dest.exists and not self.dry_run:
+                    author_dest.path.mkdir(parents=True, exist_ok=True)
+                
+                # Process each manga directory separately
+                manga_dirs = [FilePath(d) for d in self.source_path.path.iterdir() if d.is_dir()]
                 
                 if self.dry_run:
-                    logger.info(f"Would archive author folder {self.source_path} to {archive_path}")
-                    self.stats["processed"] += 1
-                    self.stats["archived"] += 1
+                    for manga_dir in manga_dirs:
+                        manga_name = manga_dir.name.split("]")[-1].strip()
+                        archive_path = author_dest.join(f"{manga_name}.zip")
+                        logger.info(f"Would archive {manga_dir} to {archive_path}")
+                    
+                    self.stats["processed"] += len(manga_dirs)
+                    self.stats["archived"] += len(manga_dirs)
                     return Result.success(self.stats)
                 
-                # Create the archive
-                with ZipFile(
-                    archive_path.path,
-                    'w',
-                    compression=ZIP_DEFLATED,
-                    compresslevel=6
-                ) as zf:
-                    # Add all files to the archive
-                    for root, dirs, files in os.walk(self.source_path.path):
-                        root_path = Path(root)
-                        for file in files:
-                            file_path = root_path / file
-                            # Calculate the path within the archive
-                            rel_path = file_path.relative_to(self.source_path.path)
-                            # Add to archive
-                            zf.write(file_path, rel_path)
+                # Process each manga directory
+                from zipfile import ZipFile, ZIP_DEFLATED
                 
-                logger.info(f"Archived author folder {self.source_path} to {archive_path}")
+                for manga_dir in manga_dirs:
+                    # Extract manga name from directory name (after the last bracket)
+                    manga_name = manga_dir.name.split("]")[-1].strip()
+                    archive_path = author_dest.join(f"{manga_name}.zip")
+                    
+                    # Create the archive
+                    with ZipFile(
+                        archive_path.path,
+                        'w',
+                        compression=ZIP_DEFLATED,
+                        compresslevel=6
+                    ) as zf:
+                        # Add all files to the archive
+                        for root, dirs, files in os.walk(manga_dir.path):
+                            root_path = Path(root)
+                            for file in files:
+                                file_path = root_path / file
+                                # Calculate the path within the archive
+                                rel_path = file_path.relative_to(manga_dir.path)
+                                # Add to archive
+                                zf.write(file_path, rel_path)
+                    
+                    logger.info(f"Archived manga directory {manga_dir} to {archive_path}")
+                    self.stats["archived"] += 1
+                
                 self.stats["processed"] += 1
-                self.stats["archived"] += 1
                 
                 # Remove source if requested
                 if self.move_source:

@@ -1,0 +1,439 @@
+"""Tests for video processor with validation."""
+
+import unittest
+from pathlib import Path
+import tempfile
+import os
+import shutil
+from unittest.mock import MagicMock, patch
+
+from collection_sorter.files import FilePath
+from collection_sorter.files.duplicates import DuplicateHandler, DuplicateStrategy
+from collection_sorter.templates.processors import (
+    VideoProcessorValidator,
+    VideoProcessorTemplate
+)
+from collection_sorter.result import ErrorType, OperationError
+
+
+class TestVideoProcessorValidator(unittest.TestCase):
+    """Tests for the VideoProcessorValidator class."""
+    
+    def setUp(self):
+        # Create temporary directories for testing
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.test_dir = Path(self.temp_dir.name)
+        self.source_dir = self.test_dir / "source"
+        self.source_dir.mkdir()
+        self.dest_dir = self.test_dir / "destination"
+        
+        # Create test video files
+        self.video_extensions = ['.mp4', '.mkv', '.avi']
+        self.subtitle_extensions = ['.srt', '.sub', '.ass']
+        
+        # Create video files
+        for ext in self.video_extensions:
+            video_file = self.source_dir / f"show_s01e01{ext}"
+            video_file.touch()
+        
+        # Create subtitle files
+        for ext in self.subtitle_extensions:
+            subtitle_file = self.source_dir / f"show_s01e01{ext}"
+            subtitle_file.touch()
+            
+        # Create a single video file for testing
+        self.single_video = self.source_dir / "single_video.mp4"
+        self.single_video.touch()
+        
+        # Create a non-video file
+        self.non_video = self.source_dir / "document.pdf"
+        self.non_video.touch()
+        
+        # Create a validator
+        self.validator = VideoProcessorValidator()
+    
+    def tearDown(self):
+        self.temp_dir.cleanup()
+    
+    def test_validate_valid_parameters(self):
+        """Test validation of valid parameters."""
+        result = self.validator.validate_parameters(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            video_extensions=self.video_extensions,
+            subtitle_extensions=self.subtitle_extensions
+        )
+        
+        self.assertTrue(result.is_success())
+        validated = result.unwrap()
+        
+        # Check that extensions are normalized (with leading dot)
+        for ext in validated["video_extensions"]:
+            self.assertTrue(ext.startswith('.'))
+        for ext in validated["subtitle_extensions"]:
+            self.assertTrue(ext.startswith('.'))
+    
+    def test_validate_default_extensions(self):
+        """Test validation with default extensions."""
+        result = self.validator.validate_parameters(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        self.assertTrue(result.is_success())
+        validated = result.unwrap()
+        
+        # Check that default extensions are provided
+        self.assertTrue(validated["video_extensions"])
+        self.assertTrue(validated["subtitle_extensions"])
+        self.assertIn(".mp4", validated["video_extensions"])
+        self.assertIn(".srt", validated["subtitle_extensions"])
+    
+    def test_validate_invalid_video_extensions(self):
+        """Test validation with invalid video extensions."""
+        result = self.validator.validate_parameters(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            video_extensions=[123, 456]  # Invalid - should be strings
+        )
+        
+        self.assertTrue(result.is_failure())
+        errors = result.error()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+        self.assertIn("Invalid video extensions", errors[0].message)
+    
+    def test_validate_invalid_subtitle_extensions(self):
+        """Test validation with invalid subtitle extensions."""
+        result = self.validator.validate_parameters(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            subtitle_extensions=[123, 456]  # Invalid - should be strings
+        )
+        
+        self.assertTrue(result.is_failure())
+        errors = result.error()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+        self.assertIn("Invalid subtitle extensions", errors[0].message)
+    
+    def test_validate_uncommon_video_extensions(self):
+        """Test validation with uncommon video extensions."""
+        with patch('collection_sorter.templates.processors.video.logger') as mock_logger:
+            result = self.validator.validate_parameters(
+                source_path=self.source_dir,
+                destination_path=self.dest_dir,
+                video_extensions=['.xyz', '.abc']  # Uncommon extensions
+            )
+            
+            self.assertTrue(result.is_success())
+            mock_logger.warning.assert_called_once()
+            warning_msg = mock_logger.warning.call_args[0][0]
+            self.assertIn("No common video extensions", warning_msg)
+    
+    def test_validate_source_is_file(self):
+        """Test validation when source is a single video file."""
+        result = self.validator.validate_parameters(
+            source_path=self.single_video,
+            destination_path=self.dest_dir
+        )
+        
+        self.assertTrue(result.is_success())
+        validated = result.unwrap()
+        self.assertEqual(str(validated["source_path"].path), str(self.single_video))
+    
+    def test_validate_source_is_non_video_file(self):
+        """Test validation when source is a non-video file."""
+        result = self.validator.validate_parameters(
+            source_path=self.non_video,
+            destination_path=self.dest_dir
+        )
+        
+        self.assertTrue(result.is_failure())
+        errors = result.error()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+        self.assertIn("does not have a valid video extension", errors[0].message)
+    
+    def test_validate_source_not_file_or_dir(self):
+        """Test validation when source is neither a file nor a directory."""
+        # Create a special file (like a socket or pipe) - simulate with mock
+        with patch('collection_sorter.files.FilePath.is_file', False):
+            with patch('collection_sorter.files.FilePath.is_directory', False):
+                result = self.validator.validate_parameters(
+                    source_path=self.source_dir,
+                    destination_path=self.dest_dir
+                )
+                
+                self.assertTrue(result.is_failure())
+                errors = result.error()
+                self.assertEqual(len(errors), 1)
+                self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+                self.assertIn("must be a file or directory", errors[0].message)
+    
+    def test_validate_destination_creation_fails(self):
+        """Test validation when destination creation fails."""
+        with patch('pathlib.Path.mkdir') as mock_mkdir:
+            mock_mkdir.side_effect = PermissionError("Permission denied")
+            
+            result = self.validator.validate_parameters(
+                source_path=self.source_dir,
+                destination_path=self.test_dir / "cannot_create",
+                dry_run=False
+            )
+            
+            self.assertTrue(result.is_failure())
+            errors = result.error()
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+            self.assertIn("Cannot create destination directory", errors[0].message)
+
+
+class TestVideoProcessorTemplate(unittest.TestCase):
+    """Tests for the VideoProcessorTemplate class."""
+    
+    def setUp(self):
+        # Create temporary directories for testing
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.test_dir = Path(self.temp_dir.name)
+        self.source_dir = self.test_dir / "source"
+        self.source_dir.mkdir()
+        self.dest_dir = self.test_dir / "destination"
+        
+        # Create test video files
+        self.video_files = []
+        for i in range(1, 4):
+            # Regular naming: Show.S01E01.mp4
+            video_file = self.source_dir / f"Show.S01E0{i}.mp4"
+            video_file.touch()
+            self.video_files.append(video_file)
+            
+            # Create matching subtitle
+            subtitle_file = self.source_dir / f"Show.S01E0{i}.srt"
+            subtitle_file.touch()
+        
+        # Create some irregular named files
+        self.irregular_video = self.source_dir / "Show_1x04.mkv"
+        self.irregular_video.touch()
+        self.video_files.append(self.irregular_video)
+        
+        self.irregular_subtitle = self.source_dir / "Show_1x04.sub"
+        self.irregular_subtitle.touch()
+        
+        # Create a single video file for testing
+        self.single_video = self.source_dir / "Single.Video.S01E05.mp4"
+        self.single_video.touch()
+        
+        # Create nested directory
+        self.nested_dir = self.source_dir / "nested"
+        self.nested_dir.mkdir()
+        self.nested_video = self.nested_dir / "Nested.Show.S01E01.mp4"
+        self.nested_video.touch()
+    
+    def tearDown(self):
+        self.temp_dir.cleanup()
+    
+    def test_init_with_valid_parameters(self):
+        """Test initialization with valid parameters."""
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            video_extensions=['.mp4', '.mkv', '.avi'],
+            subtitle_extensions=['.srt', '.sub', '.ass']
+        )
+        
+        self.assertFalse(hasattr(processor, 'validation_errors') or processor.validation_errors)
+        self.assertEqual(len(processor.video_extensions), 3)
+        self.assertEqual(len(processor.subtitle_extensions), 3)
+    
+    def test_init_with_invalid_extensions(self):
+        """Test initialization with invalid extensions."""
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            video_extensions=[123, 456]  # Invalid - should be strings
+        )
+        
+        self.assertTrue(hasattr(processor, 'validation_errors'))
+        self.assertTrue(processor.validation_errors)
+        self.assertEqual(processor.validation_errors[0].type, ErrorType.VALIDATION_ERROR)
+        self.assertIn("Invalid video extensions", processor.validation_errors[0].message)
+    
+    def test_init_with_single_video_file(self):
+        """Test initialization with a single video file."""
+        processor = VideoProcessorTemplate(
+            source_path=self.single_video,
+            destination_path=self.dest_dir
+        )
+        
+        self.assertFalse(hasattr(processor, 'validation_errors') or processor.validation_errors)
+        self.assertEqual(str(processor.source_path.path), str(self.single_video))
+    
+    def test_execute_with_validation_errors(self):
+        """Test execute method with validation errors."""
+        # Using a mock class to avoid real validation
+        class MockProcessor(VideoProcessorTemplate):
+            def __init__(self):
+                self.validation_errors = [
+                    OperationError(
+                        type=ErrorType.VALIDATION_ERROR,
+                        message="Source file does not have a valid video extension",
+                        path="test"
+                    )
+                ]
+                self.source_path = None
+                self.destination_path = None
+                self.video_extensions = ['.mp4', '.mkv', '.avi']
+                self.subtitle_extensions = ['.srt', '.sub', '.ass']
+
+        processor = MockProcessor()
+        result = processor.execute()
+        self.assertTrue(result.is_failure())
+        errors = result.error()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].type, ErrorType.VALIDATION_ERROR)
+    
+    def test_dry_run(self):
+        """Test execute method in dry_run mode."""
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir,
+            dry_run=True
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        stats = result.unwrap()
+        
+        # Files should be processed but not actually renamed
+        self.assertGreater(stats["processed"], 0)
+        self.assertEqual(len(list(self.dest_dir.glob("*.mp4"))), 0)
+    
+    def test_process_directory(self):
+        """Test processing a directory of videos."""
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        stats = result.unwrap()
+        
+        # Files should be processed and organized
+        self.assertGreater(stats["processed"], 0)
+        
+        # Regular videos should be properly renamed
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E01.mp4").exists())
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E02.mp4").exists())
+        
+        # Subtitles should accompany videos
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E01.srt").exists())
+        
+        # Irregular videos should be processed
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E04.mkv").exists() or
+                       (self.dest_dir / "Show" / "Season 01" / "Show 1x04.mkv").exists())
+    
+    def test_process_single_file(self):
+        """Test processing a single video file."""
+        processor = VideoProcessorTemplate(
+            source_path=self.single_video,
+            destination_path=self.dest_dir
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        stats = result.unwrap()
+        
+        # Single file should be processed
+        self.assertEqual(stats["processed"], 1)
+        self.assertTrue((self.dest_dir / "Single.Video" / "Season 01" / "Single.Video S01E05.mp4").exists() or
+                       (self.dest_dir / "Single Video" / "Season 01" / "Single Video S01E05.mp4").exists())
+    
+    def test_find_matching_subtitles(self):
+        """Test finding matching subtitles."""
+        # Create a processor for testing subtitle matching
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        # Execute with default subtitle matching
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        
+        # Regular subtitles should be found and processed
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E01.srt").exists())
+        
+        # Irregular subtitles should be found and processed
+        self.assertTrue((self.dest_dir / "Show" / "Season 01" / "Show S01E04.sub").exists() or
+                       (self.dest_dir / "Show" / "Season 01" / "Show 1x04.sub").exists())
+    
+    def test_process_non_standard_episode_patterns(self):
+        """Test processing videos with non-standard episode patterns."""
+        # Create files with non-standard patterns
+        non_standard = self.source_dir / "NonStandard-Ep05.mp4"
+        non_standard.touch()
+        
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        
+        # Non-standard files should be copied as-is
+        self.assertTrue((self.dest_dir / "NonStandard-Ep05.mp4").exists() or
+                       (self.dest_dir / "NonStandard" / "NonStandard-Ep05.mp4").exists())
+    
+    def test_edge_case_unicode_filenames(self):
+        """Test processing videos with unicode characters in filenames."""
+        # Create a video with unicode characters
+        unicode_video = self.source_dir / "ÜniçödeShöw.S01E01.mp4"
+        unicode_video.touch()
+        
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        
+        # Unicode filename should be preserved
+        self.assertTrue((self.dest_dir / "ÜniçödeShöw" / "Season 01" / "ÜniçödeShöw S01E01.mp4").exists() or
+                       (self.dest_dir / "UnicodeShow" / "Season 01" / "UnicodeShow S01E01.mp4").exists())
+    
+    def test_edge_case_multi_format_episodes(self):
+        """Test processing videos with multiple episode format patterns in same directory."""
+        # Create mixed format episodes in same series
+        self.source_dir / "MixedShow.S01E01.mp4"
+        self.source_dir / "MixedShow.1x02.mp4"
+        self.source_dir / "MixedShow.Episode.03.mp4"
+        
+        for file_name in [
+            "MixedShow.S01E01.mp4",
+            "MixedShow.1x02.mp4",
+            "MixedShow.Episode.03.mp4"
+        ]:
+            (self.source_dir / file_name).touch()
+        
+        processor = VideoProcessorTemplate(
+            source_path=self.source_dir,
+            destination_path=self.dest_dir
+        )
+        
+        result = processor.execute()
+        self.assertTrue(result.is_success())
+        
+        # All formats should be organized into the same show/season directory
+        mixed_show_dir = self.dest_dir / "MixedShow" / "Season 01"
+        self.assertTrue((mixed_show_dir / "MixedShow S01E01.mp4").exists() or
+                       (mixed_show_dir / "MixedShow 1x01.mp4").exists())
+        self.assertTrue((mixed_show_dir / "MixedShow S01E02.mp4").exists() or
+                       (mixed_show_dir / "MixedShow 1x02.mp4").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

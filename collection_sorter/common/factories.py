@@ -381,7 +381,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
     ):
         """
         Create a manga processor for organizing manga collections.
-        
+
         Args:
             source_path: Source path to process
             destination_path: Destination path
@@ -392,16 +392,16 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
             dry_run: Whether to simulate operations
             interactive: Whether to prompt for confirmation
             **kwargs: Additional processor-specific arguments
-            
+
         Returns:
             Configured MangaProcessorTemplate
         """
-        from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
-        
+        from collection_sorter.templates.processors import MangaProcessorTemplate, MangaProcessorValidator
+
         # Use provided values or get from config
         dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
         interactive = interactive if interactive is not None else self._get_config_value("interactive", False)
-        
+
         # Create duplicate handler
         duplicate_handler = self.duplicate_handler_factory.create(
             strategy=self._get_config_value("duplicate_strategy", self.default_duplicate_strategy),
@@ -409,19 +409,28 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
             interactive=interactive,
             dry_run=dry_run
         )
-        
-        # Create and return manga processor
-        return MangaProcessorTemplate(
-            source_path=source_path,
-            destination_path=destination_path,
-            template_func=template_func,
-            author_folders=author_folders,
-            archive=archive,
-            move_source=move_source,
-            dry_run=dry_run,
-            interactive=interactive,
-            duplicate_handler=duplicate_handler
-        )
+
+        # Create validator for parameter validation
+        validator = MangaProcessorValidator()
+
+        # Prepare parameters for validation
+        params = {
+            "source_path": source_path,
+            "destination_path": destination_path,
+            "template_func": template_func,
+            "author_folders": author_folders,
+            "archive": archive,
+            "move_source": move_source,
+            "dry_run": dry_run,
+            "interactive": interactive,
+            "duplicate_handler": duplicate_handler
+        }
+
+        # Add any additional parameters from kwargs
+        params.update(kwargs)
+
+        # Create and return manga processor with validation
+        return MangaProcessorTemplate(**params)
         
     def create_file_processor(
         self,
@@ -469,7 +478,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
         self,
         source_path: Union[str, Path, FilePath],
         destination_path: Optional[Union[str, Path, FilePath]] = None,
-        video_extensions: Optional[Set[str]] = None, 
+        video_extensions: Optional[Set[str]] = None,
         subtitle_extensions: Optional[Set[str]] = None,
         dry_run: Optional[bool] = None,
         interactive: Optional[bool] = None,
@@ -477,7 +486,7 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
     ):
         """
         Create a video processor for organizing and renaming video files.
-        
+
         Args:
             source_path: Source path to process
             destination_path: Optional destination path
@@ -486,16 +495,16 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
             dry_run: Whether to simulate operations
             interactive: Whether to prompt for confirmation
             **kwargs: Additional processor-specific arguments
-            
+
         Returns:
             Configured VideoProcessorTemplate
         """
-        from collection_sorter.templates.templates_extensions import VideoProcessorTemplate
-        
+        from collection_sorter.templates.processors import VideoProcessorTemplate, VideoProcessorValidator
+
         # Use provided values or get from config
         dry_run = dry_run if dry_run is not None else self._get_config_value("dry_run", self.default_dry_run)
         interactive = interactive if interactive is not None else self._get_config_value("interactive", False)
-        
+
         # Create duplicate handler
         duplicate_handler = self.duplicate_handler_factory.create(
             strategy=self._get_config_value("duplicate_strategy", self.default_duplicate_strategy),
@@ -503,24 +512,33 @@ class ConfigBasedProcessorFactory(ProcessorFactory):
             interactive=interactive,
             dry_run=dry_run
         )
-        
+
+        # Create validator for parameter validation
+        validator = VideoProcessorValidator()
+
         # Get default extensions from config if not provided
         if video_extensions is None:
             video_extensions = set(self._get_config_value("video.video_extensions", ['.mp4', '.mkv', '.avi', '.mov']))
-            
+
         if subtitle_extensions is None:
             subtitle_extensions = set(self._get_config_value("video.subtitle_extensions", ['.srt', '.sub', '.idx', '.ass']))
-        
-        # Create and return video processor
-        return VideoProcessorTemplate(
-            source_path=source_path,
-            destination_path=destination_path,
-            video_extensions=video_extensions,
-            subtitle_extensions=subtitle_extensions,
-            dry_run=dry_run,
-            interactive=interactive,
-            duplicate_handler=duplicate_handler
-        )
+
+        # Prepare parameters for validation
+        params = {
+            "source_path": source_path,
+            "destination_path": destination_path,
+            "video_extensions": video_extensions,
+            "subtitle_extensions": subtitle_extensions,
+            "dry_run": dry_run,
+            "interactive": interactive,
+            "duplicate_handler": duplicate_handler
+        }
+
+        # Add any additional parameters from kwargs
+        params.update(kwargs)
+
+        # Create and return video processor with validation
+        return VideoProcessorTemplate(**params)
     
     def _get_config_value(self, key: str, default: Any) -> Any:
         """

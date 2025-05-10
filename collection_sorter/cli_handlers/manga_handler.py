@@ -10,7 +10,7 @@ from collection_sorter.config.config_manager import config_manager
 from collection_sorter.common.factories import ConfigBasedProcessorFactory, create_duplicate_handler
 from collection_sorter.files import FilePath
 from collection_sorter.result import Result, OperationError, ErrorType
-from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
+from collection_sorter.templates.processors import MangaProcessorTemplate
 from collection_sorter.manga.manga_template import manga_template_function
 from .base_handler import CommandHandler, TemplateMethodCommandHandler, FactoryBasedCommandHandler
 

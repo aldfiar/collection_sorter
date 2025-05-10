@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from collection_sorter.cli_handlers.video_handler import VideoCommandHandler
-from collection_sorter.templates.templates_extensions import VideoProcessorTemplate
+from collection_sorter.templates.processors import VideoProcessorTemplate
 
 
 class TestVideoProcessor(unittest.TestCase):

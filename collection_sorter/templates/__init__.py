@@ -1,4 +1,4 @@
-from .templates  import (
+from .templates import (
     FileProcessorTemplate,
     FileMoveTemplate,
     FileCopyTemplate,
@@ -9,5 +9,10 @@ from .templates  import (
     ArchiveDirectoryTemplate,
     BatchProcessorTemplate
 )
-from .templates_extensions import MangaProcessorTemplate, VideoProcessorTemplate, BatchProcessorTemplate, \
+
+# Re-export from processors package for backward compatibility
+from .processors import (
+    MangaProcessorTemplate,
+    VideoProcessorTemplate,
     RenameProcessorTemplate
+)

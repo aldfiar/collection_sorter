@@ -8,7 +8,7 @@ from collection_sorter.config.config_manager import config_manager
 from collection_sorter.common.factories import ConfigBasedProcessorFactory
 from collection_sorter.files import FilePath
 from collection_sorter.result import Result, OperationError
-from collection_sorter.templates.templates_extensions import VideoProcessorTemplate
+from collection_sorter.templates.processors import VideoProcessorTemplate
 from .base_handler import TemplateMethodCommandHandler, FactoryBasedCommandHandler
 
 console = Console()
@@ -39,7 +39,15 @@ class VideoCommandHandler(TemplateMethodCommandHandler):
             video_extensions: File extensions for video files
             subtitle_extensions: File extensions for subtitle files
         """
-        super().__init__()
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=None,
+            duplicates_dir=None,
+            config={}
+        )
         self.sources = [FilePath(src) for src in sources]
         self.destination = FilePath(destination) if destination else None
         self.dry_run = dry_run
@@ -238,7 +246,15 @@ class VideoCommandHandlerAlternative(FactoryBasedCommandHandler):
             video_extensions: File extensions for video files
             subtitle_extensions: File extensions for subtitle files
         """
-        super().__init__()
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=None,
+            duplicates_dir=None,
+            config={}
+        )
         self.sources = [FilePath(src) for src in sources]
         self.destination = FilePath(destination) if destination else None
         self.dry_run = dry_run

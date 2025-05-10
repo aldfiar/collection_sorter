@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from collection_sorter.cli_handlers.rename_handler import RenameCommandHandler
-from collection_sorter.templates.templates_extensions import RenameProcessorTemplate
+from collection_sorter.templates.processors import RenameProcessorTemplate
 
 
 class TestRenameProcessor(unittest.TestCase):

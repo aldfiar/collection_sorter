@@ -8,7 +8,7 @@ from collection_sorter.config.config_manager import config_manager
 from collection_sorter.common.factories import ConfigBasedProcessorFactory
 from collection_sorter.files import FilePath
 from collection_sorter.result import Result, OperationError
-from collection_sorter.templates.templates_extensions import RenameProcessorTemplate
+from collection_sorter.templates.processors import RenameProcessorTemplate
 from .base_handler import TemplateMethodCommandHandler, FactoryBasedCommandHandler
 
 console = Console()
@@ -43,7 +43,15 @@ class RenameCommandHandler(TemplateMethodCommandHandler):
             recursive: Whether to process directories recursively
             patterns: Rename patterns to apply
         """
-        super().__init__()
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=None,
+            duplicates_dir=None,
+            config={}
+        )
         self.sources = [FilePath(src) for src in sources]
         self.destination = FilePath(destination) if destination else None
         self.archive = archive
@@ -252,7 +260,15 @@ class RenameCommandHandlerAlternative(FactoryBasedCommandHandler):
             recursive: Whether to process directories recursively
             patterns: Rename patterns to apply
         """
-        super().__init__()
+        super().__init__(
+            sources=sources,
+            destination=destination,
+            dry_run=dry_run,
+            interactive=interactive,
+            duplicate_strategy=None,
+            duplicates_dir=None,
+            config={}
+        )
         self.sources = [FilePath(src) for src in sources]
         self.destination = FilePath(destination) if destination else None
         self.archive = archive

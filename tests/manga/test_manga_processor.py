@@ -13,7 +13,7 @@ warnings.warn(
 )
 
 from collection_sorter.cli_handlers.manga_handler import MangaCommandHandlerTemplateMethod as MangaCommandHandler
-from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
+from collection_sorter.templates.processors import MangaProcessorTemplate
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

@@ -137,7 +137,13 @@ class ServiceProvider:
         Returns:
             String key for the type
         """
-        return f"{service_type.__module__}.{service_type.__name__}"
+        # Handle generic types from typing module by using str(service_type)
+        # This handles cases like Factory[T] which don't have a __name__ attribute
+        try:
+            return f"{service_type.__module__}.{service_type.__name__}"
+        except AttributeError:
+            # For generic types like Factory[T], use the string representation
+            return str(service_type)
 
 
 # Global service provider instance

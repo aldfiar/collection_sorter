@@ -41,6 +41,11 @@ Collection Sorter is a command-line tool for organizing file collections with a 
 - **OOP approach**: Use classes to encapsulate related functionality with clear responsibility boundaries.
 - **Path handling**: Use pathlib.Path for all file system operations instead of os.path module.
 
+## Code Writing
+- Prefer simple, clean, maintainable solutions over clever or complex ones. Readability and maintainability are PRIMARY CONCERNS, even at the cost of conciseness or performance.
+- Make the SMALLEST reasonable changes to achieve the desired outcome.
+- MUST NEVER make code changes unrelated to your current task. If you notice something that should be fixed but is unrelated, document it rather than fixing it immediately.
+- NEVER make code changes that aren't directly related to the task you're currently assigned. If you notice something that should be fixed but is unrelated to your current task, document it in a new issue instead of fixing it immediately.
 ## Key Files
 - **CLI**:
   - `collection_sorter/cli.py`: Main CLI entry point using Click
@@ -60,8 +65,20 @@ Collection Sorter is a command-line tool for organizing file collections with a 
   - `collection_sorter/config/config_manager.py`: Configuration loading and management
 
 ## Best Practices
-- Create unit tests for any new functionality
+- Create unit tests for any new functionality. Write ONLY enough code to make the failing test pas
 - Use the Result pattern for error handling rather than raising exceptions
 - Update typing for all new code
 - Follow existing design patterns when adding new features
 - Keep responsibility boundaries clear between components
+
+## Testing
+- Tests MUST comprehensively cover ALL implemented functionality.
+- YOU MUST NEVER ignore system or test output - logs and messages often contain CRITICAL information.
+- Test output MUST BE PRISTINE TO PASS.
+- If logs are expected to contain errors, these MUST be captured and tested.
+- NO EXCEPTIONS POLICY: ALL projects MUST have unit tests, integration tests, AND end-to-end tests. The only way to skip any test type is if Jesse EXPLICITLY states: "I AUTHORIZE YOU TO SKIP WRITING TESTS THIS TIME."
+
+## Version Control
+
+- For non-trivial edits, all changes MUST be tracked in git.
+- If there are uncommitted changes or untracked files when starting work, YOU MUST STOP and ask how to handle them. Suggest committing existing work first.

@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Directly import the template class to bypass service registration
 sys.path.append(str(Path(__file__).parents[2]))
-from collection_sorter.templates.templates_extensions import MangaProcessorTemplate
+from collection_sorter.templates.processors.manga import MangaProcessorTemplate
 
 # Test manga data with English fantasy/nature themed names
 TEST_MANGAS = [

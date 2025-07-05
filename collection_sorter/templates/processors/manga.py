@@ -90,7 +90,7 @@ class MangaProcessorValidator(BaseProcessorValidator):
             ))
         
         # 4. Validate destination exists or can be created
-        if 'destination_path' in validated:
+        if 'destination_path' in validated and validated['destination_path'] is not None:
             # Ensure destination directory can be created
             if not validated['destination_path'].exists and not kwargs.get('dry_run', False):
                 try:
@@ -200,7 +200,7 @@ class MangaProcessorTemplate(BaseFileProcessor):
                 return Result.failure([error])
                 
             # Make sure destination exists
-            if not self.destination_path.exists and not self.dry_run:
+            if self.destination_path and not self.destination_path.exists and not self.dry_run:
                 self.destination_path.path.mkdir(parents=True, exist_ok=True)
                 
             # If processing author folders, handle differently
@@ -215,7 +215,7 @@ class MangaProcessorTemplate(BaseFileProcessor):
                 logger.warning(f"No manga directories found in {self.source_path}")
                 return Result.success(self.stats)
             
-            # Process each manga directory
+            # Process each manga directory (destination can be None)
             processed_result = self.process_batch(manga_dirs, self.destination_path)
             
             if processed_result.is_failure():
@@ -245,7 +245,11 @@ class MangaProcessorTemplate(BaseFileProcessor):
                 # Archive the entire directory
                 from zipfile import ZipFile, ZIP_DEFLATED
                 
-                # Create author directory in destination 
+                # Create author directory in destination (handle None destination)
+                if not self.destination_path:
+                    logger.warning("No destination specified for author folder processing")
+                    return Result.success(self.stats)
+                    
                 author_dest = self.destination_path.join(self.source_path.name)
                 if not author_dest.exists and not self.dry_run:
                     author_dest.path.mkdir(parents=True, exist_ok=True)
@@ -302,7 +306,11 @@ class MangaProcessorTemplate(BaseFileProcessor):
                     
                 return Result.success(self.stats)
             else:
-                # Just move or copy the directory
+                # Just move or copy the directory (handle None destination)
+                if not self.destination_path:
+                    logger.warning("No destination specified for author folder processing")
+                    return Result.success(self.stats)
+                    
                 dest_path = self.destination_path.join(self.source_path.name)
                 
                 if self.dry_run:
@@ -403,6 +411,11 @@ class MangaProcessorTemplate(BaseFileProcessor):
             from collection_sorter.manga.manga import MangaParser
             manga_info = MangaParser.parse(source.name)
             
+            # Handle None destination 
+            if not destination:
+                logger.warning(f"No destination specified for processing {source}")
+                return Result.success(source)
+                
             # Create destination directory for this author
             author_dir = destination.join(manga_info["author"])
             if not author_dir.exists and not self.dry_run:

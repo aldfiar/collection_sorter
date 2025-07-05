@@ -158,7 +158,7 @@ class MangaCommandHandler(CommandHandler):
                 # Create the manga processor template
                 template = MangaProcessorTemplate(
                     source_path=source.path,
-                    destination_path=destination_path.path,
+                    destination_path=destination_path.path if destination_path else None,
                     template_func=manga_template_function,
                     author_folders=self.author_folders,
                     archive=self.archive,
@@ -177,7 +177,11 @@ class MangaCommandHandler(CommandHandler):
                         archived_count += data.get("archived", 0)
                         moved_count += data.get("moved", 0)
                     else:
-                        errors.extend(result.error())
+                        error_value = result.error()
+                        if isinstance(error_value, list):
+                            errors.extend(error_value)
+                        else:
+                            errors.append(error_value)
                 except Exception as e:
                     error = OperationError(
                         type=ErrorType.OPERATION_FAILED,
@@ -488,7 +492,7 @@ class MangaCommandHandlerTemplateMethod(TemplateMethodCommandHandler):
             # Create the manga processor template
             template = MangaProcessorTemplate(
                 source_path=source.path,
-                destination_path=destination_path.path,
+                destination_path=destination_path.path if destination_path else None,
                 template_func=manga_template_function,
                 author_folders=self.author_folders,
                 archive=self.archive,
@@ -508,7 +512,11 @@ class MangaCommandHandlerTemplateMethod(TemplateMethodCommandHandler):
                     self.stats["moved"] += data.get("moved", 0)
                     processed_items.append(data)
                 else:
-                    errors.extend(result.error())
+                    error_value = result.error()
+                    if isinstance(error_value, list):
+                        errors.extend(error_value)
+                    else:
+                        errors.append(error_value)
             except Exception as e:
                 errors.append(OperationError(
                     type=ErrorType.OPERATION_FAILED,
@@ -673,7 +681,7 @@ class MangaCommandHandlerAlternative(FactoryBasedCommandHandler):
             # Create manga processor from factory
             processor = self.factory.create_manga_processor(
                 source_path=source.path,
-                destination_path=destination.path,
+                destination_path=destination.path if destination else None,
                 template_func=manga_template_function,
                 dry_run=self.dry_run,
                 interactive=self.interactive

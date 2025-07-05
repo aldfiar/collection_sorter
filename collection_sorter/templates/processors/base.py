@@ -272,6 +272,10 @@ class BaseProcessorValidator:
         Returns:
             ValidationResult with validation status and FilePath
         """
+        # Allow None destination paths
+        if destination_path is None:
+            return ValidationResult.success(None)
+            
         validator = PathValidator(must_exist=False, create_if_missing=True, must_be_dir=True)
         return validator.validate(destination_path)
     

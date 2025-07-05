@@ -95,7 +95,7 @@ class VideoCommandHandler(TemplateMethodCommandHandler):
         valid_sources = []
         
         for source in self.sources:
-            path = Path(source.value)
+            path = Path(source.path)
             if not path.exists():
                 errors.append(OperationError(f"Source path does not exist: {source}", path=str(source)))
             else:
@@ -115,7 +115,7 @@ class VideoCommandHandler(TemplateMethodCommandHandler):
         if not self.destination:
             return Result.success(None)
             
-        dest_path = Path(self.destination.value)
+        dest_path = Path(self.destination.path)
         
         try:
             if not dest_path.exists():
@@ -169,8 +169,8 @@ class VideoCommandHandler(TemplateMethodCommandHandler):
         for source in source_paths:
             # Create the video processor template
             template = VideoProcessorTemplate(
-                source_path=source.value,
-                destination_path=destination_path.value if destination_path else None,
+                source_path=source.path,
+                destination_path=destination_path.path if destination_path else None,
                 video_extensions=self.video_extensions,
                 subtitle_extensions=self.subtitle_extensions,
                 dry_run=self.dry_run,
@@ -306,8 +306,8 @@ class VideoCommandHandlerAlternative(FactoryBasedCommandHandler):
         try:
             # Create video processor from factory
             processor = self.factory.create_video_processor(
-                source_path=source.value,
-                destination_path=destination.value if destination else None,
+                source_path=source.path,
+                destination_path=destination.path if destination else None,
                 dry_run=self.dry_run,
                 interactive=self.interactive
             )

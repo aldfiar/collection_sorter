@@ -23,6 +23,15 @@ Collection Sorter uses several design patterns to ensure maintainability and fle
 - **Factory Pattern**: Dynamic creation of processors based on configuration
 - **Result Pattern**: Functional error handling without exceptions
 - **Strategy Pattern**: Pluggable strategies for file operations
+- **Validation Pattern**: Enhanced parameter validation with early error detection
+
+### Enhanced Processors
+
+The project features a modern processor architecture with:
+- **Type-safe validation** using generics and Pydantic models
+- **Comprehensive error handling** with detailed error messages
+- **Extensible validation framework** for custom processors
+- **Template method implementations** for manga, video, and rename operations
 
 ## Installation
 
@@ -60,6 +69,13 @@ Collection Sorter requires Python 3.9 or later and the following dependencies:
   - pyyaml: For configuration file support
   - pydantic: For configuration validation
   - tomli: For TOML configuration support
+
+- **Development Dependencies**:
+  - pytest: For testing framework
+  - black: For code formatting
+  - isort: For import sorting
+  - flake8: For code linting
+  - mypy: For type checking
 
 These dependencies are automatically installed when you install the package with pip or poetry.
 
@@ -215,25 +231,87 @@ collection-sorter rename ~/Files -d ~/Organized --duplicate-strategy rename_new
 
 ## Development
 
+### Setting Up Development Environment
+
+```bash
+# Clone the repository
+git clone https://github.com/aldfiar/collection-sorter.git
+cd collection-sorter
+
+# Install with development dependencies
+poetry install
+
+# Activate the virtual environment
+poetry shell
+```
+
+### Code Quality Tools
+
+The project uses several tools to maintain code quality:
+
+```bash
+# Format code with black
+black collection_sorter/
+
+# Sort imports with isort
+isort collection_sorter/
+
+# Lint code with flake8
+flake8 collection_sorter/
+
+# Type check with mypy
+mypy collection_sorter/
+
+# Run all quality checks
+black collection_sorter/ && isort collection_sorter/ && flake8 collection_sorter/
+```
+
 ### Running Tests
 
 Collection Sorter has a comprehensive test suite. To run tests:
 
 ```bash
-# Using unittest
-python -m unittest discover collection_sorter/tests
-
-# Or if you have pytest installed
+# Run all tests with pytest
 pytest
+
+# Run tests with coverage
+pytest --cov=collection_sorter
+
+# Run specific test file
+pytest tests/templates/processors/test_manga.py
+
+# Run tests with verbose output
+pytest -v
 ```
 
 #### Test Requirements
 
 - **Unit Tests**: Most unit tests do not require external dependencies
 - **Integration Tests**: Full integration tests require all dependencies to be installed
-- **Basic Integration Tests**: Basic CLI tests will run without external dependencies
+- **Validation Tests**: Tests for the enhanced processor validation framework
+- **CLI Integration Tests**: End-to-end testing of command-line interface
 
 If you're running tests without all dependencies installed, you'll see some tests skipped with messages indicating which dependencies are missing.
+
+### Project Structure
+
+The codebase is organized using clear separation of concerns:
+
+```
+collection_sorter/
+├── cli.py                      # Main CLI entry point
+├── cli_handlers/               # Command handler implementations
+├── cli_patterns/               # Command dispatching
+├── templates/processors/       # Enhanced processor implementations
+│   ├── base.py                # Validation framework
+│   ├── manga.py               # Manga processor with validation
+│   ├── rename.py              # Rename processor with validation
+│   └── video.py               # Video processor with validation
+├── config/                     # Configuration management
+├── files/                      # File handling utilities
+├── result/                     # Result pattern implementation
+└── tests/                      # Comprehensive test suite
+```
 
 ### Contributing
 
@@ -241,11 +319,30 @@ Contributions are welcome! Here's how you can contribute:
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-new-feature`
-3. Make your changes and add tests
-4. Ensure all tests pass: `python -m unittest discover`
-5. Commit your changes: `git commit -am 'Add my new feature'`
-6. Push to the branch: `git push origin feature/my-new-feature`
-7. Submit a pull request
+3. Set up the development environment: `poetry install`
+4. Make your changes and add tests
+5. Ensure code quality standards:
+   ```bash
+   # Format and lint code
+   black collection_sorter/ && isort collection_sorter/ && flake8 collection_sorter/
+   
+   # Run type checking
+   mypy collection_sorter/
+   
+   # Run all tests
+   pytest
+   ```
+6. Commit your changes: `git commit -am 'Add my new feature'`
+7. Push to the branch: `git push origin feature/my-new-feature`
+8. Submit a pull request
+
+#### Code Style Guidelines
+
+- Follow PEP 8 with 88-character line length (Black-compatible)
+- Use type hints for all function parameters and return types
+- Write comprehensive tests for new functionality
+- Follow existing design patterns (Template Method, Result, Strategy)
+- Add validation for new processor parameters
 
 ## License
 

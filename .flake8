@@ -1,0 +1,68 @@
+[flake8]
+# Configuration for flake8
+# Compatible with black (88 character line length) and isort
+
+# Maximum line length - matches black configuration
+max-line-length = 88
+
+# Exclude common directories that shouldn't be linted
+exclude = 
+    .git,
+    __pycache__,
+    .pytest_cache,
+    .venv,
+    venv,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    .idea,
+    .aider.tags.cache.v3
+
+# Error codes to ignore for black compatibility
+ignore = 
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # E501: line too long (handled by black)
+    E501
+
+# Error codes to select (can be used instead of ignore for stricter control)
+select = 
+    # Pyflakes errors
+    F,
+    # Pycodestyle errors  
+    E,
+    # Pycodestyle warnings
+    W,
+    # McCabe complexity
+    C90
+
+# McCabe complexity threshold
+max-complexity = 12
+
+# Import order checking (handled by isort, so we disable flake8's version)
+# You can enable this if you want flake8 to also check imports
+# import-order-style = google
+
+# Per-file ignores for specific cases
+per-file-ignores =
+    # Tests can have longer lines and unused imports
+    tests/*:E501,F401,F811
+    # __init__.py files often have unused imports for re-export
+    */__init__.py:F401
+    # CLI files may have unused imports for command registration
+    */cli.py:F401
+
+# Show source code for each error
+show-source = True
+
+# Show the specific error code for each violation
+show-pep8 = True
+
+# Count the number of errors and warnings
+count = True
+
+# Enable color output (if terminal supports it)
+# color = auto

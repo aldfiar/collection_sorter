@@ -2,7 +2,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Callable, List, Union
 
-from collection_sorter.common.files import CollectionPath
+from collection_sorter.files.files import CollectionPath
 
 support_extension = [
     "mp3",

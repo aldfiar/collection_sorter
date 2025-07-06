@@ -10,10 +10,10 @@ class MangaParser(object):
     @staticmethod
     def _extract_tags(tag_string: str) -> List[str]:
         """Extract tags from a string containing bracketed sections.
-        
+
         Args:
             tag_string: String containing tags in brackets
-            
+
         Returns:
             List of extracted tag strings
         """

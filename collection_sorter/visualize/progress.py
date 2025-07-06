@@ -1,34 +1,33 @@
 from contextlib import contextmanager
-from typing import Optional, Iterable, TypeVar
+from typing import Iterable, Optional, TypeVar
 
 from rich.progress import (
-    Progress,
-    TextColumn,
     BarColumn,
+    Progress,
+    SpinnerColumn,
     TaskProgressColumn,
+    TextColumn,
     TimeRemainingColumn,
-    SpinnerColumn
 )
 from tqdm import tqdm
 
 from collection_sorter.project_logging import console
 
 # Type variable for generic iterables
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def get_progress(
-    description: str = "Processing",
-    total: Optional[int] = None,
-    use_rich: bool = True
+    description: str = "Processing", total: Optional[int] = None, use_rich: bool = True
 ) -> Progress:
     """
     Create a progress bar.
-    
+
     Args:
         description: Description of the progress bar
         total: Total number of items to process
         use_rich: Use rich progress bar instead of tqdm
-        
+
     Returns:
         Progress bar object
     """
@@ -48,20 +47,19 @@ def get_progress(
             unit="items",
         )
 
+
 @contextmanager
 def progress_bar(
-    description: str = "Processing",
-    total: Optional[int] = None,
-    use_rich: bool = True
+    description: str = "Processing", total: Optional[int] = None, use_rich: bool = True
 ):
     """
     Context manager for progress bars.
-    
+
     Args:
         description: Description of the progress bar
         total: Total number of items to process
         use_rich: Use rich progress bar instead of tqdm
-        
+
     Yields:
         Progress bar object
     """
@@ -76,19 +74,18 @@ def progress_bar(
         finally:
             progress.close()
 
+
 def track_progress(
-    iterable: Iterable[T],
-    description: str = "Processing",
-    use_rich: bool = True
+    iterable: Iterable[T], description: str = "Processing", use_rich: bool = True
 ) -> Iterable[T]:
     """
     Track progress of an iterable.
-    
+
     Args:
         iterable: Iterable to track
         description: Description of the progress bar
         use_rich: Use rich progress bar instead of tqdm
-        
+
     Yields:
         Items from the iterable
     """
@@ -99,7 +96,7 @@ def track_progress(
             total = len(iterable)
         except (TypeError, AttributeError):
             pass
-    
+
     if use_rich:
         with get_progress(description, total, use_rich) as progress:
             task_id = progress.add_task(description, total=total)

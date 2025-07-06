@@ -1,11 +1,11 @@
 from .strategies import (
-    FileOperationStrategy,
-    FileOperationContext,
-    MoveFileStrategy,
-    CopyFileStrategy,
     ArchiveStrategy,
+    CopyFileStrategy,
     ExtractArchiveStrategy,
+    FileOperationContext,
+    FileOperationStrategy,
+    MoveFileStrategy,
     RenameFileStrategy,
     get_strategy,
-    register_strategy
+    register_strategy,
 )

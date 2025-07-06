@@ -7,49 +7,43 @@ This module provides processors for various file types using the Template Method
 from collection_sorter.templates.processors.base import (
     BaseFileProcessor,
     BaseProcessorValidator,
+    ExtensionsValidator,
+    PathValidator,
     ValidationResult,
     Validator,
-    PathValidator,
-    ExtensionsValidator
 )
-
-from collection_sorter.templates.processors.rename import (
-    RenameProcessorTemplate,
-    RenameProcessorValidator,
-    PatternValidator
-)
-
 from collection_sorter.templates.processors.manga import (
     MangaProcessorTemplate,
     MangaProcessorValidator,
-    MangaTemplateValidator
+    MangaTemplateValidator,
 )
-
+from collection_sorter.templates.processors.rename import (
+    PatternValidator,
+    RenameProcessorTemplate,
+    RenameProcessorValidator,
+)
 from collection_sorter.templates.processors.video import (
     VideoProcessorTemplate,
-    VideoProcessorValidator
+    VideoProcessorValidator,
 )
 
 __all__ = [
     # Base classes
-    'BaseFileProcessor',
-    'BaseProcessorValidator',
-    'ValidationResult',
-    'Validator',
-    'PathValidator',
-    'ExtensionsValidator',
-    
+    "BaseFileProcessor",
+    "BaseProcessorValidator",
+    "ValidationResult",
+    "Validator",
+    "PathValidator",
+    "ExtensionsValidator",
     # Rename processor
-    'RenameProcessorTemplate',
-    'RenameProcessorValidator',
-    'PatternValidator',
-    
+    "RenameProcessorTemplate",
+    "RenameProcessorValidator",
+    "PatternValidator",
     # Manga processor
-    'MangaProcessorTemplate',
-    'MangaProcessorValidator',
-    'MangaTemplateValidator',
-    
+    "MangaProcessorTemplate",
+    "MangaProcessorValidator",
+    "MangaTemplateValidator",
     # Video processor
-    'VideoProcessorTemplate',
-    'VideoProcessorValidator'
+    "VideoProcessorTemplate",
+    "VideoProcessorValidator",
 ]

@@ -6,8 +6,9 @@ in the cli_handlers package. It provides functions that dispatch CLI commands
 to the appropriate handlers.
 """
 
-import click
 from typing import Any, Dict
+
+import click
 
 # Import handlers from cli_handlers package
 from collection_sorter.cli_handlers import (

@@ -26,6 +26,7 @@ def windows_rename_function(path: Path) -> Path:
 
 from collection_sorter.common.exceptions import FileOperationError
 
+
 def rename_function(path: Path, symbol_from: str, symbol_to: str) -> Path:
     """
     Rename a file by replacing occurrences of a symbol with another symbol.
@@ -48,10 +49,10 @@ def rename_function(path: Path, symbol_from: str, symbol_to: str) -> Path:
         name = path.name
         linux_name = name.replace(symbol_from, symbol_to)
         new_path = path.parent / linux_name
-        
+
         if new_path.exists():
             logger.warning(f"Destination path already exists: {new_path}")
-            
+
         logger.debug(f"Renaming file from {path} to {new_path}")
         return new_path
     except Exception as e:

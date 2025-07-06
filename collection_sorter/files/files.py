@@ -31,10 +31,10 @@ class CollectionPath:
 
         Args:
             path: The path to start collecting from.
-            
+
         Returns:
             Set[Path]: A set of unique paths found recursively
-            
+
         Raises:
             FileOperationError: If path access fails
         """

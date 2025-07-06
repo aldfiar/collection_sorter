@@ -16,10 +16,10 @@ from collection_sorter.common.factories import (
     ConfigBasedProcessorFactory,
     create_duplicate_handler,
 )
+from collection_sorter.config.config_manager import config_manager
 from collection_sorter.files import FilePath
 from collection_sorter.result import ErrorType, OperationError, Result
 from collection_sorter.templates import ArchiveDirectoryTemplate, BatchProcessorTemplate
-from collection_sorter.config.config_manager import config_manager
 
 from .base_handler import CommandHandler, FactoryBasedCommandHandler
 

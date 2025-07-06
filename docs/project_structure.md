@@ -79,6 +79,19 @@ collection_sorter/
     └── progress.py             # Progress tracking
 ```
 
+## Documentation Structure
+
+```
+docs/
+├── configuration.md            # Configuration system documentation
+├── patterns/                   # Design pattern documentation
+│   └── manga_migration.md      # Manga processor migration guide
+├── project_structure.md        # This file
+├── tasks/                      # Task and feature documentation
+├── usage_analysis.md           # Usage patterns and analysis
+└── validation_framework.md     # Validation framework guide
+```
+
 ## Key Components
 
 ### CLI System
@@ -132,26 +145,48 @@ The `tests/` directory mirrors the structure of the main package:
 tests/
 ├── __init__.py
 ├── cli_handlers/           # Tests for command handlers
+│   ├── __init__.py
+│   ├── test_direct_manga_processor.py
+│   ├── test_rename_processor.py
+│   ├── test_video_processor.py
+│   └── test_zip_processor.py
 ├── common/                 # Tests for common components
+│   ├── __init__.py
+│   └── test_factories.py
 ├── files/                  # Tests for file operations
+│   ├── __init__.py
+│   └── test_files.py
 ├── manga/                  # Tests for manga processing
+│   ├── __init__.py
+│   ├── test_manga_handler.py
+│   ├── test_manga_processor.py
+│   ├── test_manga_processor_template.py
+│   └── test_manga_sort.py
 ├── result/                 # Tests for result pattern
+│   ├── __init__.py
+│   └── test_result_pattern.py
 ├── strategies/             # Tests for strategies
+│   ├── __init__.py
+│   └── test_strategies.py
 ├── templates/              # Tests for templates
+│   ├── __init__.py
 │   ├── test_templates.py   # Tests for base templates
 │   └── processors/         # Tests for enhanced processors
+│       ├── __init__.py
 │       ├── test_base.py    # Tests for validation framework
 │       ├── test_manga.py   # Tests for manga processor
 │       ├── test_rename.py  # Tests for rename processor
 │       └── test_video.py   # Tests for video processor
-└── test_cli_integration.py # End-to-end CLI tests
+├── test_cli_integration.py # End-to-end CLI tests
+├── test_cli_manga_integration.py
+└── test_cli_zip_integration.py
 ```
 
 ## Migration Status
 
-The codebase is currently in a transition period:
+The codebase migration is complete:
 
-- New code should use the enhanced processors from `templates/processors/`
-- Legacy code still references `templates_extensions.py` (deprecated)
-- A migration plan is available in `docs/tasks/complete_templates_refactoring.md`
+- Enhanced processors in `templates/processors/` are now the standard
+- Legacy `templates_extensions.py` has been removed
+- All processors use the validation framework from `templates/processors/base.py`
 - See `docs/validation_framework.md` for guidance on using the validation framework

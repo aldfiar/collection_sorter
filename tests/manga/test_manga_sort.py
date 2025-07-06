@@ -8,7 +8,7 @@ from unittest import TestCase
 # This test file is testing a legacy module that has been replaced.
 warnings.warn(
     "test_manga_sort.py uses the deprecated manga_sort function. "
-    "Use the MangaProcessorTemplate from collection_sorter.common.templates_extensions "
+    "Use the MangaProcessorTemplate from collection_sorter.templates.processors.manga "
     "or MangaCommandHandler from collection_sorter.cli_handlers.manga_handler instead. "
     "See test_manga_processor.py for the new tests.",
     DeprecationWarning,
